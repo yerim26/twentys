@@ -1,0 +1,18 @@
+@font-face { font-family: Galmuri14; src: url('../../assets/fonts/Galmuri14.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: block; }
+* { box-sizing: border-box; }
+html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: white; }
+body { display: grid; place-items: center; font-family: Galmuri14, sans-serif; }
+#game { width: min(100vw, calc(100svh * 16 / 9)); aspect-ratio: 16 / 9; }
+#game-svg { display: block; width: 100%; height: 100%; overflow: visible; user-select: none; -webkit-user-select: none; touch-action: none; }
+#game-svg text, #game-svg tspan { font-family: Galmuri14, sans-serif; font-weight: 400; }
+[hidden] { display: none !important; }
+#board-lines * { fill: none !important; }
+#initial-board, #active-board, #speech { pointer-events: none; }
+[data-item], [data-placed], #reset, #completion-next { cursor: pointer; outline: none; }
+.hit-target { fill: transparent !important; stroke: none !important; }
+.tray-ghost * { fill: #e1dedb !important; stroke: none !important; filter: none !important; }
+#game-svg.is-holding, #game-svg.is-holding #inventory * { cursor: grabbing; }
+.piece-depth { transform-box: fill-box; transform-origin: center; }
+.held-art { filter: drop-shadow(0px 8px 5px rgba(53,30,40,.22)); }
+/* SVG user-space coordinates: the top-center of the character's head. */
+#speech { transform-box: view-box; transform-origin: 344.54px 827px; }

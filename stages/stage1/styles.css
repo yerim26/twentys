@@ -1,0 +1,21 @@
+@font-face { font-family: Galmuri14; src: url('assets/fonts/Galmuri14.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: block; }
+* { box-sizing: border-box; }
+html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: white; }
+body { display: grid; place-items: center; font-family: Galmuri14, sans-serif; }
+#game { width: min(100vw, calc(100svh * 16 / 9)); aspect-ratio: 16 / 9; }
+#game-svg { display: block; width: 100%; height: 100%; overflow: visible; user-select: none; -webkit-user-select: none; touch-action: none; }
+#game-svg text, #game-svg tspan { font-family: Galmuri14, sans-serif; font-weight: 400; }
+[hidden] { display: none !important; }
+#board-lines * { fill: none !important; }
+#board-base, #board-lines { pointer-events: none; }
+[data-item], [data-placed], #reset, #next { cursor: pointer; outline: none; }
+[data-item].is-empty > g *, [data-item].is-empty > polygon { fill: #d7dddb !important; stroke: none !important; }
+[data-item] .hit-target { fill: transparent !important; stroke: none !important; }
+.placed-label { pointer-events: none; }
+#game-svg.is-holding { cursor: grabbing; }
+.piece-depth { transform-box: fill-box; transform-origin: center; }
+#room-furniture > g { transform-box: fill-box; transform-origin: center bottom; }
+.piece-art { filter: drop-shadow(0px 2px 1px rgba(53,30,40,0.16)); }
+#held-item .piece-art { filter: drop-shadow(0px 8px 5px rgba(53,30,40,0.22)); }
+#game-svg.is-holding #inventory, #game-svg.is-holding #inventory * { cursor: grabbing; }
+/* Original 1920×1080 geometry scales uniformly. Effects run only on placement. */

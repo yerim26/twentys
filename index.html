@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>My First Home</title><style>html,body,iframe{width:100%;height:100%;margin:0;border:0;display:block;overflow:hidden}body{background:white}</style></head><body><iframe id="stage" title="My First Home"></iframe><script type="module">
+import { installHeldPieceAppearance } from './shared/held-piece.js';
+import { installStageNavigation } from './shared/stage-navigation.js';
+const frame = document.querySelector('#stage');
+frame.addEventListener('load', () => {
+  installHeldPieceAppearance(frame.contentDocument);
+  if (frame.dataset.stage === '1') installStageNavigation(frame.contentDocument, () => {
+    const url = new URL(location.href);
+    url.searchParams.set('stage', '2');
+    history.pushState(null, '', url);
+    showStage();
+  });
+});
+function showStage() {
+  const requested = new URL(location.href).searchParams.get('stage');
+  const stage = requested === '1' ? 1 : 2;
+  // The host owns the round history; iframe loads must not add a second entry.
+  frame.contentWindow.location.replace(new URL(`stages/stage${stage}/index.html`, location.href));
+  frame.dataset.stage = stage;
+  document.title = `${stage === 1 ? '독립' : '경험과 성장'} — My First Home`;
+}
+window.addEventListener('popstate', showStage);
+showStage();
+</script></body></html>
