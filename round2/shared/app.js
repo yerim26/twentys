@@ -1,32 +1,41 @@
 import {BOARD,artLayout,footprint,createGame} from './game.js';
 import {playPlacement,stopPlacementMotion} from './motion.js';
+import {installRoomCharacterMotion} from './room-character-motion.js';
 const NS='http://www.w3.org/2000/svg';
 const el=(tag,attrs={},children=[])=>{const n=document.createElementNS(NS,tag);for(const[k,v]of Object.entries(attrs))n.setAttribute(k,v);n.append(...children);return n;};
 const use=id=>el('use',{href:`#${id}`});
 const show=(node,visible)=>node?.toggleAttribute('hidden',!visible);
-const requested=new URL(location.href).searchParams.get('room');
+const parameters=new URL(location.href).searchParams;
+const round=parameters.get('round')==='3'?3:2;
+const requested=parameters.get('room');
 const room=['workki','zibi','eddie'].includes(requested)?requested:'workki';
 try {
- const responses=await Promise.all([fetch(`./rooms/${room}.svg`),fetch(`./rooms/${room}.json`)]);
+ const directory=round===3?'round3':'rooms';
+ const responses=await Promise.all([fetch(`./${directory}/${room}.svg`),fetch(`./${directory}/${room}.json`)]);
  if(responses.some(r=>!r.ok))throw new Error('방 파일을 불러오지 못했습니다.');
  const [source,data]=await Promise.all([responses[0].text(),responses[1].json()]);
  const svg=new DOMParser().parseFromString(source,'image/svg+xml').documentElement;
  if(svg.tagName!=='svg')throw new Error('방 그림 형식이 올바르지 않습니다.');
  document.querySelector('#game').replaceChildren(document.importNode(svg,true));
- document.title=`${data.name||room} · Round 2 독립 — Twentys`;
+ document.title=`${data.name||room} · Round ${round} ${round===3?'경험과 성장':'독립'} — Twentys`;
  await document.fonts.ready;
  initialize(document.querySelector('#game-svg'),data.items||data);
 } catch(error) {document.querySelector('#game').textContent=error.message;console.error(error);}
 function initialize(svg,items){
  const $=s=>svg.querySelector(s),defs=$('defs'),game=createGame(items),byId=new Map(items.map(i=>[i.id,i]));
+ svg.dataset.round=String(round);
+ // The completion card belongs only to Round 3; Round 2 ends on its final line.
+ if(round===2)$('#completion')?.remove();
  let state=game.initial(),pointer=null,inverse=null,raf=0,heldKey='',revision=0,endTimer=0,popupTimer=0;
  const rendered=new Map(),artCache=new Map();
+ const characterMotion=installRoomCharacterMotion(svg,{room});
+ window.addEventListener('pagehide',()=>characterMotion.dispose(),{once:true});
  let completionOpen=false,returnFocus=null;
  const savedTabIndexes=new Map();
  function setCompletion(open){
-  const popup=$('#completion');if(!popup)return;
+  const popup=$('#completion');if(round!==3||!popup)return;
   if(open===completionOpen)return;
-  completionOpen=open;show(popup,open);
+  completionOpen=open;show(popup,open);characterMotion.setPaused(open);
   if(open){
    returnFocus=document.activeElement;
    for(const control of svg.querySelectorAll('[role="button"], [tabindex]')){
@@ -87,7 +96,9 @@ function initialize(svg,items){
  }
  function dialogue(kind,animate){
   const speech=$('#speech');if(!speech||!$(`#dialogue-${kind}`))return;
-  speech.getAnimations().forEach(a=>a.cancel());speech.replaceChildren(use(`dialogue-${kind}`));speech.dataset.dialogue=kind;
+  speech.getAnimations().forEach(a=>a.cancel());
+  if(speech.dataset.popOrigin){const [x,y]=speech.dataset.popOrigin.split(/[, ]+/).map(Number);if(Number.isFinite(x)&&Number.isFinite(y))speech.style.transformOrigin=`${x}px ${y}px`;}
+  speech.replaceChildren(use(`dialogue-${kind}`));speech.dataset.dialogue=kind;
   if(animate&&!matchMedia('(prefers-reduced-motion: reduce)').matches)speech.animate([{transform:'scale(.04,.04)',opacity:0},{transform:'scale(1.035,1.06)',opacity:1,offset:.7},{transform:'scale(1)',opacity:1}],{duration:1020,easing:'cubic-bezier(.2,.8,.2,1)'});
  }
  function render(lastPlaced=null){
@@ -109,18 +120,34 @@ function initialize(svg,items){
   const key=state.held?`${state.held}:${state.rotations[state.held]}`:'';
   if(key!==heldKey){heldKey=key;const held=$('#held-item');held.replaceChildren();if(key){const id=artCache.get(key);held.append(el('g',{class:'shadow-only',filter:'url(#common-shadow)'},[use(id)]),el('g',{class:'pickup-paper'},[use(id)]));}show(held,!!key);}
   positionHeld();
-  show($('#room-start'),!complete);show($('#room-complete')||$('#room-finish'),complete);show($('#room-additions'),!complete);
+  const completedRoom=$('#room-complete')||$('#room-finish');
+  show($('#room-start'),!complete||!completedRoom);show(completedRoom,complete);show($('#room-additions'),!complete||!completedRoom);
+  if(lastPlaced)characterMotion[complete&&round===2?'complete':'placement']();else characterMotion.reset();
   if(lastPlaced){
    const selector=complete?`[data-complete-reveal="${lastPlaced}"]`:`[data-reveal="${lastPlaced}"]`;
    playPlacement(rendered.get(lastPlaced)?.piece,[...svg.querySelectorAll(selector)]);
   }
-  if(lastPlaced&&complete){dialogue('finish',true);const version=revision;popupTimer=setTimeout(()=>{if(version===revision&&game.complete(state))setCompletion(true);},3000);}
+  if(lastPlaced&&round===3){
+   // Read the placed piece's own line, including the ninth piece, before the ending.
+   dialogue($(`#dialogue-${lastPlaced}`)?lastPlaced:'start',true);
+   if(complete){
+    const version=revision;
+    endTimer=setTimeout(()=>{
+     if(version!==revision||!game.complete(state))return;
+     dialogue('finish',true);characterMotion.complete();
+     // This timer starts when the final line appears, independently of motion.
+     popupTimer=setTimeout(()=>{if(version===revision&&game.complete(state))setCompletion(true);},3000);
+    },1800);
+   }
+  }else if(lastPlaced&&complete)dialogue('finish',true);
   else if(!complete&&$('#speech')?.dataset.dialogue==='finish')dialogue('start',false);
  }
+ function resetRound(){state=game.initial();dialogue('start',false);render();}
+ function completionAction(){setCompletion(false);if(round===3)resetRound();}
  function activate(target,point){
-  if(target.closest('#completion-next')){setCompletion(false);return;}
+  if(target.closest('#completion-next')){completionAction();return;}
   if(completionOpen)return;
-  if(target.closest('#reset')){state=game.initial();dialogue('start',false);render();return;}
+  if(target.closest('#reset')){resetRound();return;}
   if(state.held){
    if(target.closest('#inventory')){state=game.returnPiece(state);render();return;}
    const held=state.held,next=game.place(state,point.x-BOARD.x,point.y-BOARD.y);
@@ -138,7 +165,7 @@ function initialize(svg,items){
   if(completionOpen){
    if(event.key==='Escape'){event.preventDefault();setCompletion(false);return;}
    if(event.key==='Tab'){event.preventDefault();$('#completion-next')?.focus();return;}
-   if(event.key==='Enter'||event.key===' '){event.preventDefault();if(event.target.closest('#completion-next'))setCompletion(false);return;}
+   if(event.key==='Enter'||event.key===' '){event.preventDefault();if(event.target.closest('#completion-next'))completionAction();return;}
    return;
   }
   if(event.key==='Escape'&&state.held){event.preventDefault();state=game.returnPiece(state);render();return;}
@@ -150,5 +177,5 @@ function initialize(svg,items){
  });
  updateMatrix();dialogue('start',false);render();
  // Read-only state snapshots make browser QA reproducible without bypassing input.
- window.puzzle={room,items,getState:()=>structuredClone(state),layout:(id,r)=>artLayout(byId.get(id),r)};
+ window.puzzle={room,round,items,getState:()=>structuredClone(state),layout:(id,r)=>artLayout(byId.get(id),r)};
 }

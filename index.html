@@ -15,14 +15,16 @@ frame.addEventListener('load', () => {
 });
 function showStage() {
   const params = new URL(location.href).searchParams;
-  if (params.get('round') === '2') {
+  if (['2', '3'].includes(params.get('round'))) {
+    const round = params.get('round');
     const requestedRoom = params.get('room');
     const room = ['workki', 'zibi', 'eddie'].includes(requestedRoom) ? requestedRoom : 'workki';
     const target = new URL('round2/index.html', location.href);
     target.searchParams.set('room', room);
+    target.searchParams.set('round', round);
     frame.dataset.stage = 'round2';
     frame.contentWindow.location.replace(target);
-    document.title = `${{ workki: '왈끼 작업방', zibi: '지비지기 침실', eddie: '에디 욕실' }[room]} · Round 2 독립 — Twentys`;
+    document.title = `${{ workki: '왈끼 작업방', zibi: '지비지기 침실', eddie: '에디 욕실' }[room]} · Round ${round} ${round === '3' ? '경험과 성장' : '독립'} — Twentys`;
     return;
   }
   const requested = new URL(location.href).searchParams.get('stage');
