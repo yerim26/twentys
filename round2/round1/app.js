@@ -42,7 +42,7 @@ function initialize(svg,data){
  const nextQuestion=$('#question-next'),nextVisual=make('g',{class:'question-next-visual'});
  for(const child of [...nextQuestion.children])if(!child.classList.contains('hit-target'))nextVisual.append(child);
  nextQuestion.prepend(nextVisual);
- const questionContent=make('g',{id:'question-content',transform:'translate(-10 0)'});
+ const questionContent=make('g',{id:'question-content',transform:'translate(-20 0)'});
  $('#question-number').before(questionContent);
  questionContent.append($('#question-number'),$('#question-text'),...$$('.answer-row'));
  const resultButton=$('#result-show'),resultVisual=make('g',{class:'result-show-visual'});
