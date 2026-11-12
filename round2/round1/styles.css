@@ -25,7 +25,7 @@
 .result-action-visual{transform-box:fill-box;transform-origin:center;transition:transform 160ms ease-out}
 .result-action-visual.is-hovered,.result-action-visual.is-focused{transform:scale(1.04)}
 .result-action-visual.is-active{transform:scale(.985)}
-.result-action-visual.is-active rect:not(.hit-target){fill:#e2d7cc!important}
+.result-action-visual.is-active rect:not(.hit-target){fill:#555!important}
 @media(prefers-reduced-motion:reduce){.result-action-visual{transition:none;transform:none!important}}
 
 .question-next-visual{transform-box:fill-box;transform-origin:center;transition:transform 160ms ease-out;pointer-events:none}

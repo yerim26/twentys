@@ -27,6 +27,21 @@ function initialize(svg,data){
  const initial=data.originalDots||dots.map(dot=>{const m=dot.transform.baseVal.consolidate()?.matrix;return[m?.e||0,m?.f||0];});
  const lines=make('polyline',{id:'connection-line',fill:'none',stroke:'#514840','stroke-width':2,'stroke-linejoin':'round','stroke-linecap':'round','pointer-events':'none'});
  $('#connections').append(lines);
+ let lineAnimation=null,lineLength=0,lineRevision=0;
+ window.addEventListener('pagehide',()=>{lineRevision++;lineAnimation?.cancel();},{once:true});
+ function extendConnection(points){
+  const revision=++lineRevision;
+  const visibleLength=Math.max(0,lineLength-(Number.parseFloat(getComputedStyle(lines).strokeDashoffset)||0));
+  lineAnimation?.cancel();
+  lines.setAttribute('points',points.map(point=>point.join(',')).join(' '));
+  lineLength=lines.getTotalLength();
+  lines.style.strokeDasharray=lineLength?`${lineLength} ${lineLength}`:'none';
+  lines.style.strokeDashoffset='0';
+  if(!lineLength||matchMedia('(prefers-reduced-motion: reduce)').matches)return Promise.resolve(true);
+  lineAnimation=lines.animate([{strokeDashoffset:String(Math.max(0,lineLength-visibleLength))},{strokeDashoffset:'0'}],{duration:280,easing:'ease-out'});
+  lineAnimation.id='connection-draw';
+  return lineAnimation.finished.then(()=>revision===lineRevision,()=>false);
+ }
  for(const dot of dots){
   const number=Number(dot.dataset.dot),circle=dot.querySelector('circle');circle?.classList.add('dot-core');
   dot.setAttribute('role','button');dot.setAttribute('tabindex','-1');dot.setAttribute('aria-label',`${number}번 점`);
@@ -146,7 +161,7 @@ function initialize(svg,data){
   const hintCenter=new DOMPoint(hintBox.x+hintBox.width/2,hintBox.y+hintBox.height/2);
   const originalCenter=hintMatrix?hintCenter.matrixTransform(hintMatrix):hintCenter;
   const pointXs=points.map(point=>point[0]);
-  drawHintPosition.setAttribute('transform',`translate(${(Math.min(...pointXs)+Math.max(...pointXs))/2-originalCenter.x} 0)`);
+  drawHintPosition.setAttribute('transform',`translate(${(Math.min(...pointXs)+Math.max(...pointXs))/2-originalCenter.x-(room==='workki'?20:0)} 0)`);
   const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
   await Promise.all(dots.map(async(dot,index)=>{
    const from=initial[index],to=points[index];
@@ -162,8 +177,11 @@ function initialize(svg,data){
    else if(action.id==='question-prev'&&question>0){question--;update();}
    else if(action.id==='question-next'&&answers[question]!==null){if(question<6){question++;update();}else connect().catch(console.error);}
   }else if(phase==='connect'&&Number(action.dataset.dot)===nextDot){
-   nextDot++;const points=data.dots[room].slice(0,nextDot-1);if(nextDot===22&&data.closedOutline)points.push(points[0]);lines.setAttribute('points',points.map(point=>point.join(',')).join(' '));
-   if(nextDot===22)phase='connected';update();if(phase==='connect')dots[nextDot-1]?.focus();else $('#result-show')?.focus();
+   nextDot++;const points=data.dots[room].slice(0,nextDot-1);if(nextDot===22&&data.closedOutline)points.push(points[0]);
+   const drawn=extendConnection(points);
+   if(nextDot===22)phase='finishing';update();
+   if(phase==='connect')dots[nextDot-1]?.focus();
+   else drawn.then(done=>{if(done&&phase==='finishing'){phase='connected';update();$('#result-show')?.focus();}});
   }else if(phase==='connected'&&action.id==='result-show'){phase='result';update();revealResult();}
   else if(phase==='result'&&action.id==='restart')goToRound(1);
   else if(phase==='result'&&action.id==='continue')goToRound(2,room);
