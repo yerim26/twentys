@@ -17,6 +17,8 @@ function initialize(svg,data){
  const $=selector=>svg.querySelector(selector),$$=selector=>[...svg.querySelectorAll(selector)];
  let phase='survey',question=0,answers=Array(7).fill(null),room=null,nextDot=1;
  const questions=data.questions||[];
+ const drawHint=$('#draw-hint'),drawHintPosition=make('g',{id:'draw-hint-position'});
+ drawHint.before(drawHintPosition);drawHintPosition.append(drawHint);
  const dots=$$('[data-dot]').sort((a,b)=>Number(a.dataset.dot)-Number(b.dataset.dot));
  const initial=data.originalDots||dots.map(dot=>{const m=dot.transform.baseVal.consolidate()?.matrix;return[m?.e||0,m?.f||0];});
  const lines=make('polyline',{id:'connection-line',fill:'none',stroke:'#514840','stroke-width':2,'stroke-linejoin':'round','stroke-linecap':'round','pointer-events':'none'});
@@ -125,6 +127,11 @@ function initialize(svg,data){
   if(answers.some(answer=>answer===null)||phase!=='survey')return;
   chooseRoom();phase='moving';update();
   const points=data.dots?.[room];if(!points||points.length!==21)throw Error('캐릭터 연결점이 올바르지 않습니다.');
+  const hintBox=drawHint.getBBox(),hintMatrix=drawHint.transform.baseVal.consolidate()?.matrix;
+  const hintCenter=new DOMPoint(hintBox.x+hintBox.width/2,hintBox.y+hintBox.height/2);
+  const originalCenter=hintMatrix?hintCenter.matrixTransform(hintMatrix):hintCenter;
+  const pointXs=points.map(point=>point[0]);
+  drawHintPosition.setAttribute('transform',`translate(${(Math.min(...pointXs)+Math.max(...pointXs))/2-originalCenter.x} 0)`);
   const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
   await Promise.all(dots.map(async(dot,index)=>{
    const from=initial[index],to=points[index];
