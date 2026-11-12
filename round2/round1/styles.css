@@ -29,5 +29,5 @@
 @media(prefers-reduced-motion:reduce){.result-action-visual{transition:none;transform:none!important}}
 
 .question-next-visual{transform-box:fill-box;transform-origin:center;transition:transform 160ms ease-out;pointer-events:none}
-#question-next:not([aria-disabled=true]):hover .question-next-visual{transform:scale(1.04)}
+#question-next:hover .question-next-visual,#question-next:focus-visible .question-next-visual{transform:scale(1.2)}
 @media(prefers-reduced-motion:reduce){.question-next-visual{transition:none}}
