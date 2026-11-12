@@ -60,8 +60,9 @@ function initialize(svg,data){
   answer.before(row);row.append(answer,$(`#answer-${answer.dataset.answer}-text`));
  }
  const nextQuestion=$('#question-next'),nextVisual=make('g',{class:'question-next-visual'});
- for(const child of [...nextQuestion.children])if(!child.classList.contains('hit-target'))nextVisual.append(child);
- nextQuestion.prepend(nextVisual);
+ const nextPulse=make('g',{class:'question-next-pulse'});
+ for(const child of [...nextQuestion.children])if(!child.classList.contains('hit-target'))nextPulse.append(child);
+ nextVisual.append(nextPulse);nextQuestion.prepend(nextVisual);
  const questionContent=make('g',{id:'question-content',transform:'translate(-20 0)'});
  $('#question-number').before(questionContent);
  const answerContent=make('g',{id:'answer-content'});
@@ -169,6 +170,7 @@ function initialize(svg,data){
   }
   show($('#question-prev'),survey);show($('#question-next'),survey);
   $('#question-prev')?.setAttribute('aria-disabled',String(question===0));$('#question-next')?.setAttribute('aria-disabled',String(answers[question]===null));
+  nextQuestion.classList.toggle('is-guided',survey&&answers[question]!==null);
   lines.setAttribute('fill',phase==='connected'?'#f9f2fc':'none');
   const progress=$('#dot-progress-fill');
   if(progress){
