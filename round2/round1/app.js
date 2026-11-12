@@ -3,7 +3,7 @@ const NS='http://www.w3.org/2000/svg';
 const make=(tag,attrs={})=>{const n=document.createElementNS(NS,tag);for(const[k,v]of Object.entries(attrs))n.setAttribute(k,v);return n;};
 const show=(node,yes)=>node?.toggleAttribute('hidden',!yes);
 try{
- const [response,configuration,questionResponse]=await Promise.all([fetch(new URL('./screen.svg',import.meta.url)),fetch(new URL('./data.json',import.meta.url)),fetch(new URL('./questions.json',import.meta.url))]);
+ const [response,configuration,questionResponse]=await Promise.all([fetch(new URL('./screen.svg?v=result-dots-2',import.meta.url)),fetch(new URL('./data.json',import.meta.url)),fetch(new URL('./questions.json',import.meta.url))]);
  if(!response.ok||!configuration.ok||!questionResponse.ok)throw Error('설문 화면을 불러오지 못했습니다.');
  const [source,data,questions]=await Promise.all([response.text(),configuration.json(),questionResponse.json()]);data.questions=questions;
  const parsed=new DOMParser().parseFromString(source,'image/svg+xml').documentElement;
@@ -109,12 +109,15 @@ function initialize(svg,data){
    resultMotionTimer=setTimeout(async()=>{
     if(phase!=='result'||revision!==resultMotionRevision)return;
     const outlineDots=$$(`[data-result="${room}"] [data-result-dot]`);
+    if(outlineDots.length!==21)return;
     const fades=outlineDots.map(dot=>{
      const fade=dot.animate([{opacity:1},{opacity:0}],{duration:reduced?0:200,fill:'forwards',easing:'ease-out'});
      fade.id='result-dot-exit';resultMotions.push(fade);return fade.finished;
     });
     await Promise.allSettled(fades);
-    if(reduced||phase!=='result'||revision!==resultMotionRevision)return;
+    if(phase!=='result'||revision!==resultMotionRevision)return;
+    outlineDots.forEach(dot=>show(dot,false));
+    if(reduced)return;
     const character=$(`[data-result="${room}"] [data-result-entry="character"]`);
     if(!character)return;
     character.style.transformOrigin='center bottom';
@@ -136,7 +139,7 @@ function initialize(svg,data){
   const plain=String(value).replaceAll('\\n','\n');
   if(selector!=='#question-text'&&!selector.startsWith('#answer-')){n.textContent=plain;return;}
   const answer=selector.startsWith('#answer-'),maxWidth=answer?410:430,maxLines=answer?2:3;
-  let size=answer?28:30,wrapped=[];
+  let size=answer?28:36,wrapped=[];
   do{
    measure.font=`${size}px Pretendard`;wrapped=[];
    for(const paragraph of plain.split('\n')){let line='';for(const char of paragraph){if(line&&measure.measureText(line+char).width>maxWidth){wrapped.push(line.trim());line=char;}else line+=char;}wrapped.push(line.trim());}
