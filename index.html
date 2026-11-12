@@ -15,16 +15,18 @@ frame.addEventListener('load', () => {
 });
 function showStage() {
   const params = new URL(location.href).searchParams;
-  if (['2', '3'].includes(params.get('round'))) {
-    const round = params.get('round');
+  const requestedRound = params.get('round');
+  const legacyStage = !requestedRound && ['1', '2'].includes(params.get('stage'));
+  if (!legacyStage) {
+    const round = ['2', '3'].includes(requestedRound) ? requestedRound : '1';
     const requestedRoom = params.get('room');
     const room = ['workki', 'zibi', 'eddie'].includes(requestedRoom) ? requestedRoom : 'workki';
     const target = new URL('round2/index.html', location.href);
-    target.searchParams.set('room', room);
     target.searchParams.set('round', round);
+    if (round !== '1') target.searchParams.set('room', room);
     frame.dataset.stage = 'round2';
     frame.contentWindow.location.replace(target);
-    document.title = `${{ workki: '왈끼 작업방', zibi: '지비지기 침실', eddie: '에디 욕실' }[room]} · Round ${round} ${round === '3' ? '경험과 성장' : '독립'} — Twentys`;
+    document.title = round === '1' ? 'Round 1 탐색 — Twentys' : `${{ workki: '왈끼', zibi: '지비지기', eddie: '에디' }[room]} · Round ${round} — Twentys`;
     return;
   }
   const requested = new URL(location.href).searchParams.get('stage');

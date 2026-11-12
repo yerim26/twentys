@@ -1,3 +1,4 @@
+import {goToRound} from './navigation.js';
 import {BOARD,artLayout,footprint,createGame} from './game.js';
 import {playPlacement,stopPlacementMotion} from './motion.js';
 import {installRoomCharacterMotion} from './room-character-motion.js';
@@ -6,7 +7,7 @@ const el=(tag,attrs={},children=[])=>{const n=document.createElementNS(NS,tag);f
 const use=id=>el('use',{href:`#${id}`});
 const show=(node,visible)=>node?.toggleAttribute('hidden',!visible);
 const parameters=new URL(location.href).searchParams;
-const round=parameters.get('round')==='3'?3:2;
+const round=parameters.get('round')==='3'||(!parameters.has('round')&&parameters.get('stage')==='2')?3:2;
 const requested=parameters.get('room');
 const room=['workki','zibi','eddie'].includes(requested)?requested:'workki';
 try {
@@ -26,7 +27,7 @@ function initialize(svg,items){
  svg.dataset.round=String(round);
  // The completion card belongs only to Round 3; Round 2 ends on its final line.
  if(round===2)$('#completion')?.remove();
- let state=game.initial(),pointer=null,inverse=null,raf=0,heldKey='',revision=0,endTimer=0,popupTimer=0;
+ let state=game.initial(),pointer=null,inverse=null,raf=0,heldKey='',revision=0,endTimer=0,popupTimer=0,returnTimer=0;
  const rendered=new Map(),artCache=new Map();
  const characterMotion=installRoomCharacterMotion(svg,{room});
  window.addEventListener('pagehide',()=>characterMotion.dispose(),{once:true});
@@ -35,7 +36,8 @@ function initialize(svg,items){
  function setCompletion(open){
   const popup=$('#completion');if(round!==3||!popup)return;
   if(open===completionOpen)return;
-  completionOpen=open;show(popup,open);characterMotion.setPaused(open);
+  completionOpen=open;show(popup,open);characterMotion.setPaused(open);clearTimeout(returnTimer);
+  if(open)returnTimer=setTimeout(()=>goToRound(1),4000);
   if(open){
    returnFocus=document.activeElement;
    for(const control of svg.querySelectorAll('[role="button"], [tabindex]')){
@@ -163,11 +165,11 @@ function initialize(svg,items){
      popupTimer=setTimeout(()=>{if(version===revision&&game.complete(state))setCompletion(true);},3000);
     },1800);
    }
-  }else if(lastPlaced&&complete)dialogue('finish',true);
+  }else if(lastPlaced&&complete){dialogue('finish',true);const version=revision;endTimer=setTimeout(()=>{if(version===revision&&game.complete(state))goToRound(3,room);},4000);}
   else if(!complete&&$('#speech')?.dataset.dialogue==='finish')dialogue('start',false);
  }
  function resetRound(){state=game.initial();dialogue('start',false);render();}
- function completionAction(){setCompletion(false);if(round===3)resetRound();}
+ function completionAction(){if(round===3)goToRound(1);}
  function activate(target,point){
   if(target.closest('#completion-next')){completionAction();return;}
   if(completionOpen)return;
@@ -187,7 +189,7 @@ function initialize(svg,items){
  document.addEventListener('contextmenu',event=>{if(!state.held||completionOpen)return;event.preventDefault();track(event);state=game.rotate(state);render();});
  document.addEventListener('keydown',event=>{
   if(completionOpen){
-   if(event.key==='Escape'){event.preventDefault();setCompletion(false);return;}
+   if(event.key==='Escape'){event.preventDefault();completionAction();return;}
    if(event.key==='Tab'){event.preventDefault();$('#completion-next')?.focus();return;}
    if(event.key==='Enter'||event.key===' '){event.preventDefault();if(event.target.closest('#completion-next'))completionAction();return;}
    return;
