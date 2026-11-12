@@ -63,7 +63,7 @@ function initialize(svg,data){
  nextQuestion.prepend(nextVisual);
  const questionContent=make('g',{id:'question-content',transform:'translate(-20 0)'});
  $('#question-number').before(questionContent);
- const answerContent=make('g',{id:'answer-content',transform:'translate(0 -20)'});
+ const answerContent=make('g',{id:'answer-content'});
  answerContent.append(...$$('.answer-row'));
  questionContent.append($('#question-number'),$('#question-text'),answerContent);
  const resultButton=$('#result-show'),resultVisual=make('g',{class:'result-show-visual'});
