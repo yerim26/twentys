@@ -3549,7 +3549,7 @@
         <rect class="cls-331" x="4690.7" y="1287.01" width="107.91" height="22.81" rx="8.61" ry="8.61" transform="translate(3446.2362 6043.0714) rotate(-90)" />
         <rect class="cls-318" x="4675.61" y="1281.01" width="67.01" height="33.33" rx="12.59" ry="12.59" transform="translate(3411.4389 6006.7985) rotate(-90)" />
       </g>
-      </g><g transform="translate(0 -1498.26)" class="tray-label" hidden="hidden"><text class="cls-377" transform="translate(812.7241 2441.486)"><tspan x="0" y="0">침대</tspan></text>
+      </g><g transform="translate(0 -1498.26)" class="tray-label" hidden="hidden"><text class="cls-377" text-anchor="middle" transform="translate(823.14184570 2441.486)"><tspan x="0" y="0">침대</tspan></text>
       </g><rect x="726.44921875" y="883.9609375" width="193.38525390625" height="117.91015625" fill="transparent" class="hit-target" /></g><g data-item="washer" role="button" tabindex="0" aria-label="세탁기"><g transform="translate(-3961 -355.5)" class="tray-original"><g class="cls-421">
         <rect class="cls-321" x="4906.53" y="1242.88" width="112.95" height="107.99" rx="17.17" ry="17.17" />
         <circle class="cls-338" cx="4963.01" cy="1296.88" r="35.8" />
@@ -3558,7 +3558,7 @@
         <rect class="cls-321" x="4906.53" y="1242.88" width="112.95" height="107.99" rx="17.17" ry="17.17" />
         <circle class="cls-338" cx="4963.01" cy="1296.88" r="35.8" />
       </g>
-      </g><g transform="translate(0 -1498.26)" class="tray-label" hidden="hidden"><text class="cls-377" transform="translate(980.042 2441.486)"><tspan x="0" y="0">세탁기</tspan></text>
+      </g><g transform="translate(0 -1498.26)" class="tray-label" hidden="hidden"><text class="cls-377" text-anchor="middle" transform="translate(1002.00488281 2441.486)"><tspan x="0" y="0">세탁기</tspan></text>
       </g><rect x="940.52978515625" y="882.3800048828125" width="122.9501953125" height="117.989990234375" fill="transparent" class="hit-target" /></g><g data-item="plant" role="button" tabindex="0" aria-label="화분"><g transform="translate(-3961 -355.5)" class="tray-original"><g class="cls-503">
         <polygon class="cls-339" points="5104.1 1244.94 5063.68 1244.94 5063.68 1253.34 5067.6 1253.34 5070.13 1278.52 5098.56 1278.52 5100.24 1253.34 5104.1 1253.34 5104.1 1244.94" />
         <g>
@@ -3577,7 +3577,7 @@
           <circle class="cls-339" cx="5083.98" cy="1242.88" r="7.88" />
         </g>
       </g>
-      </g><g transform="translate(0 -1498.26)" class="tray-label" hidden="hidden"><text class="cls-377" transform="translate(1108.1265 2400.1503)"><tspan x="0" y="0">화분</tspan></text>
+      </g><g transform="translate(0 -1498.26)" class="tray-label" hidden="hidden"><text class="cls-377" text-anchor="middle" transform="translate(1122.89013672 2400.1503)"><tspan x="0" y="0">화분</tspan></text>
       </g><rect x="1097.68017578125" y="861.8099365234375" width="50.419921875" height="66.2100830078125" fill="transparent" class="hit-target" /></g><g data-item="memo" role="button" tabindex="0" aria-label="메모"><g transform="translate(-3961 -355.5)" class="tray-original"><g class="cls-415">
         <rect class="cls-297" x="5061.17" y="1302.29" width="45.63" height="44.16" />
         <rect class="cls-293" x="5078.54" y="1295.74" width="10.89" height="13.08" />
@@ -3586,7 +3586,7 @@
         <rect class="cls-297" x="5061.17" y="1302.29" width="45.63" height="44.16" />
         <rect class="cls-293" x="5078.54" y="1295.74" width="10.89" height="13.08" />
       </g>
-      </g><g transform="translate(0 -1498.26)" class="tray-label" hidden="hidden"><text class="cls-377" transform="translate(1108.0596 2469.2817)"><tspan x="0" y="0">메모</tspan></text>
+      </g><g transform="translate(0 -1498.26)" class="tray-label" hidden="hidden"><text class="cls-377" text-anchor="middle" transform="translate(1122.98486328 2469.2817)"><tspan x="0" y="0">메모</tspan></text>
       </g><rect x="1095.169921875" y="935.239990234375" width="55.6298828125" height="60.7100830078125" fill="transparent" class="hit-target" /></g><g data-item="cabinet" role="button" tabindex="0" aria-label="서랍장"><g transform="translate(-3961 -355.5)" class="tray-original"><g class="cls-414">
         <rect class="cls-314" x="5182.96" y="1208.56" width="104.64" height="175.53" transform="translate(6531.6103 -3938.949) rotate(90)" />
         <rect class="cls-314" x="5151.83" y="1248.33" width="41.72" height="96" />
@@ -3609,7 +3609,7 @@
         <rect class="cls-314" x="5268.31" y="1287.98" width="3.42" height="15.09" />
         <rect class="cls-314" x="5309.25" y="1287.98" width="3.42" height="15.09" />
       </g>
-      </g><g transform="translate(0 -1498.26)" class="tray-label" hidden="hidden"><text class="cls-377" transform="translate(1249.6011 2441.4858)"><tspan x="0" y="0">서랍장</tspan></text>
+      </g><g transform="translate(0 -1498.26)" class="tray-label" hidden="hidden"><text class="cls-377" text-anchor="middle" transform="translate(1274.28540039 2441.4858)"><tspan x="0" y="0">서랍장</tspan></text>
       </g><rect x="1181.5205078125" y="883.510986328125" width="185.52978515625" height="114.64013671875" fill="transparent" class="hit-target" /></g><g data-item="mobile" role="button" tabindex="0" aria-label="오브제"><g transform="translate(-3961 -355.5)" class="tray-original"><g class="cls-409">
         <g>
           <path class="cls-201" d="M5399.96,1287.61c0,3.17-.66,6.17-1.89,8.89-.15-2.58-9.04-4.66-20-4.66s-19.58,2.02-19.95,4.55c-1.2-2.69-1.86-5.67-1.86-8.78,0-12.07,9.79-21.84,21.86-21.84S5399.96,1275.54,5399.96,1287.61Z" />
@@ -3630,14 +3630,14 @@
         <circle class="cls-288" cx="5372.03" cy="1332.64" r="1.49" />
         <line class="cls-286" x1="5378.12" y1="1265.77" x2="5378.12" y2="1247.88" />
       </g>
-      </g><g transform="translate(0 -1498.26)" class="tray-label" hidden="hidden"><text class="cls-377" transform="translate(1396.1514 2444.8845)"><tspan x="0" y="0">오브제</tspan></text>
+      </g><g transform="translate(0 -1498.26)" class="tray-label" hidden="hidden"><text class="cls-377" text-anchor="middle" transform="translate(1417.10986328 2444.8845)"><tspan x="0" y="0">오브제</tspan></text>
       </g><rect x="1390.259765625" y="887.3800048828125" width="53.7001953125" height="102.400146484375" fill="transparent" class="hit-target" /></g><g data-item="clothes" role="button" tabindex="0" aria-label="옷"><g transform="translate(-3961 -355.5)" class="tray-original"><g class="cls-531">
         <path class="cls-344" d="M5490.25,1285.21l.1,1.37c.48,1.3,1.73,2.24,3.2,2.24,1.61,0,2.97-1.13,3.32-2.65.02-.25.03-.5.03-.76s-.01-.51-.03-.76c-.39-5.2-4.73-9.3-10.03-9.3s-10.02,5.06-10.02,10.62l.01,7.96-41.5,20.79v.03c-.75.11-1.42.46-1.92.96-.61.61-.99,1.46-.99,2.39,0,1.71,1.26,3.12,2.91,3.35.02,0,.03,0,.05,0,.14.02.28.03.42.03h89.78q.29,0,.56-.04s.07-.02.1-.02c.67-.14,1.26-.47,1.72-.93.62-.61.99-1.45.99-2.39,0-1.64-1.16-3-2.71-3.31v-.07l-42.72-21.4v-8.65c.33-1.53,1.69-2.67,3.32-2.67S5489.97,1283.61,5490.25,1285.21M5448.82,1314.72l28.02-14.04,3.94-1.97,2.74,1.37,29.23,14.64H5448.82Z" />
       </g>
       </g><g transform="translate(-3961 -355.5)" class="tray-ghost" hidden="hidden"><g class="cls-531">
         <path class="cls-344" d="M5490.25,1285.21l.1,1.37c.48,1.3,1.73,2.24,3.2,2.24,1.61,0,2.97-1.13,3.32-2.65.02-.25.03-.5.03-.76s-.01-.51-.03-.76c-.39-5.2-4.73-9.3-10.03-9.3s-10.02,5.06-10.02,10.62l.01,7.96-41.5,20.79v.03c-.75.11-1.42.46-1.92.96-.61.61-.99,1.46-.99,2.39,0,1.71,1.26,3.12,2.91,3.35.02,0,.03,0,.05,0,.14.02.28.03.42.03h89.78q.29,0,.56-.04s.07-.02.1-.02c.67-.14,1.26-.47,1.72-.93.62-.61.99-1.45.99-2.39,0-1.64-1.16-3-2.71-3.31v-.07l-42.72-21.4v-8.65c.33-1.53,1.69-2.67,3.32-2.67S5489.97,1283.61,5490.25,1285.21M5448.82,1314.72l28.02-14.04,3.94-1.97,2.74,1.37,29.23,14.64H5448.82Z" />
       </g>
-      </g><g transform="translate(0 -1498.26)" class="tray-label" hidden="hidden"><text class="cls-377" transform="translate(1513.0044 2465.9118)"><tspan x="0" y="0">옷</tspan></text>
+      </g><g transform="translate(0 -1498.26)" class="tray-label" hidden="hidden"><text class="cls-377" text-anchor="middle" transform="translate(1519.68505859 2465.9118)"><tspan x="0" y="0">옷</tspan></text>
       </g><rect x="1466.419921875" y="914.849853515625" width="106.5302734375" height="56.1300048828125" fill="transparent" class="hit-target" /></g><g data-item="nightstand" role="button" tabindex="0" aria-label="협탁"><g transform="translate(-3961 -355.5)" class="tray-original"><g class="cls-376">
         <rect class="cls-290" x="5561.41" y="1273.81" width="58.53" height="58.53" />
         <rect class="cls-290" x="5566.24" y="1278.64" width="48.85" height="48.85" />
@@ -3648,7 +3648,7 @@
         <rect class="cls-290" x="5566.24" y="1278.64" width="48.85" height="48.85" />
         <rect class="cls-290" x="5580.63" y="1286.16" width="20.08" height="5.52" />
       </g>
-      </g><g transform="translate(0 -1498.26)" class="tray-label" hidden="hidden"><text class="cls-377" transform="translate(1614.1853 2447.2448)"><tspan x="0" y="0">협탁</tspan></text>
+      </g><g transform="translate(0 -1498.26)" class="tray-label" hidden="hidden"><text class="cls-377" text-anchor="middle" transform="translate(1629.67504883 2447.2448)"><tspan x="0" y="0">협탁</tspan></text>
       </g><rect x="1595.41015625" y="913.31005859375" width="68.52978515625" height="68.530029296875" fill="transparent" class="hit-target" /></g><g data-item="lamp" role="button" tabindex="0" aria-label="조명"><g transform="translate(-3961 -355.5)" class="tray-original"><g class="cls-515">
         <rect class="cls-306" x="5661.37" y="1295.67" width="52.04" height="13.78" transform="translate(6989.9536 -4384.8246) rotate(90)" />
         <rect class="cls-283" x="5684.07" y="1318.96" width="6.63" height="25.88" rx="3.32" ry="3.32" transform="translate(7019.2904 -4355.4877) rotate(90)" />
@@ -3661,7 +3661,7 @@
         <path class="cls-283" d="M5706.75,1281.17c-1.13-1.53-2.41-3-3.89-4.21-.26-.21-1.31-.73-1.5-1.05.11.27.92,2.29,1.73,4.31-2.85-2.75-8.81-4.64-15.7-4.64s-12.86,1.89-15.7,4.64l1.74-4.35c-.82.46-1.55,1.1-2.23,1.73-6.42,5.83-13.03,18.81-9.21,27.24,4.1,9.06,16.66,11.04,25.4,11.04s19.57-1.91,24.81-9.19C5717.51,1299.32,5711.36,1287.38,5706.75,1281.17Z" />
         <ellipse class="cls-307" cx="5687.39" cy="1279.68" rx="17.48" ry="10.25" />
       </g>
-      </g><g transform="translate(0 -1498.26)" class="tray-label" hidden="hidden"><text class="cls-377" transform="translate(1710.8025 2441.8842)"><tspan x="0" y="0">조명</tspan></text>
+      </g><g transform="translate(0 -1498.26)" class="tray-label" hidden="hidden"><text class="cls-377" text-anchor="middle" transform="translate(1726.55737305 2441.8842)"><tspan x="0" y="0">조명</tspan></text>
       </g><rect x="1694.86376953125" y="908.9300537109375" width="63.38720703125" height="75.7818603515625" fill="transparent" class="hit-target" /></g></g><g id="placed-items" /><g id="held-item" pointer-events="none" hidden="hidden" /><g id="completion" transform="translate(-1 -637.71)" role="dialog" aria-modal="true" aria-label="ALL PIECES MATCH!" hidden="hidden" data-source="v2/stages/stage1/index.html#completion"><g id="completion-art" transform="translate(0 -3420)"><rect class="round2-completion-cls-194" x="1" y="4057.71" width="1920" height="1080" />
       <g>
         <rect class="round2-completion-cls-122" x="590.78" y="4238.82" width="740.43" height="717.78" transform="translate(5558.7084 3636.7084) rotate(90)" />

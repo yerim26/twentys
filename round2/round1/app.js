@@ -3,7 +3,7 @@ const NS='http://www.w3.org/2000/svg';
 const make=(tag,attrs={})=>{const n=document.createElementNS(NS,tag);for(const[k,v]of Object.entries(attrs))n.setAttribute(k,v);return n;};
 const show=(node,yes)=>node?.toggleAttribute('hidden',!yes);
 try{
- const [response,configuration,questionResponse]=await Promise.all([fetch(new URL('./screen.svg?v=result-dots-2',import.meta.url)),fetch(new URL('./data.json',import.meta.url)),fetch(new URL('./questions.json',import.meta.url))]);
+ const [response,configuration,questionResponse]=await Promise.all([fetch(new URL('./screen.svg?v=result-dots-2',import.meta.url)),fetch(new URL('./data.json?v=workki-22',import.meta.url)),fetch(new URL('./questions.json',import.meta.url))]);
  if(!response.ok||!configuration.ok||!questionResponse.ok)throw Error('설문 화면을 불러오지 못했습니다.');
  const [source,data,questions]=await Promise.all([response.text(),configuration.json(),questionResponse.json()]);data.questions=questions;
  const parsed=new DOMParser().parseFromString(source,'image/svg+xml').documentElement;
@@ -19,6 +19,7 @@ function initialize(svg,data){
  let progressTarget=-1,progressAnimation=null;
  window.addEventListener('pagehide',()=>progressAnimation?.cancel(),{once:true});
  const questions=data.questions||[];
+ const connectionCount=()=>room?data.dots[room].length:21;
  const drawHint=$('#draw-hint'),drawHintPosition=make('g',{id:'draw-hint-position'});
  drawHint.before(drawHintPosition);drawHintPosition.append(drawHint);
  const dots=$$('[data-dot]').sort((a,b)=>Number(a.dataset.dot)-Number(b.dataset.dot));
@@ -171,7 +172,7 @@ function initialize(svg,data){
   lines.setAttribute('fill',phase==='connected'?'#f9f2fc':'none');
   const progress=$('#dot-progress-fill');
   if(progress){
-   const target=Number(progress.dataset.fullWidth||243.73)*Math.min(nextDot-1,21)/21;
+   const target=Number(progress.dataset.fullWidth||243.73)*Math.min(nextDot-1,connectionCount())/connectionCount();
    if(target!==progressTarget){
     const current=Number.parseFloat(getComputedStyle(progress).width)||0;
     progressTarget=target;progressAnimation?.cancel();progress.setAttribute('width',target);
@@ -181,7 +182,7 @@ function initialize(svg,data){
     }
    }
   }
-  show($('#result-show'),phase==='connected');show($('#draw-hint'),phase==='connect'||phase==='moving');text('#dot-progress',`${Math.min(nextDot-1,21)}/21`);
+  show($('#result-show'),phase==='connected');show($('#draw-hint'),phase==='connect'||phase==='moving');text('#dot-progress',`${Math.min(nextDot-1,connectionCount())}/${connectionCount()}`);
  }
  function chooseRoom(){
   if(room)return room;
@@ -190,8 +191,16 @@ function initialize(svg,data){
  }
  async function connect(){
   if(answers.some(answer=>answer===null)||phase!=='survey')return;
-  chooseRoom();phase='moving';update();
-  const points=data.dots?.[room];if(!points||points.length!==21)throw Error('캐릭터 연결점이 올바르지 않습니다.');
+  chooseRoom();
+  const points=data.dots?.[room];if(!points||points.length!==(room==='workki'?22:21))throw Error('캐릭터 연결점이 올바르지 않습니다.');
+  // The extra Workki corner exists only after survey completion, never as an answer.
+  while(dots.length<points.length){
+   const number=dots.length+1,dot=dots.at(-1).cloneNode(true);
+   dot.dataset.dot=String(number);dot.setAttribute('aria-label',`${number}번 점`);
+   dot.querySelector('text tspan').textContent=String(number);
+   $('#dots').append(dot);dots.push(dot);
+  }
+  phase='moving';update();
   const hintBox=drawHint.getBBox(),hintMatrix=drawHint.transform.baseVal.consolidate()?.matrix;
   const hintCenter=new DOMPoint(hintBox.x+hintBox.width/2,hintBox.y+hintBox.height/2);
   const originalCenter=hintMatrix?hintCenter.matrixTransform(hintMatrix):hintCenter;
@@ -199,7 +208,7 @@ function initialize(svg,data){
   drawHintPosition.setAttribute('transform',`translate(${(Math.min(...pointXs)+Math.max(...pointXs))/2-originalCenter.x-(room==='workki'?20:0)} 0)`);
   const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
   await Promise.all(dots.map(async(dot,index)=>{
-   const from=initial[index],to=points[index];
+   const from=initial[index]||initial.at(-1),to=points[index];
    if(!reduced){const animation=dot.animate([{transform:`translate(${from[0]}px,${from[1]}px)`},{transform:`translate(${to[0]}px,${to[1]}px)`}],{duration:900,easing:'cubic-bezier(.2,.8,.2,1)'});await animation.finished.catch(()=>{});}
    dot.setAttribute('transform',`translate(${to[0]} ${to[1]})`);
   }));
@@ -212,9 +221,9 @@ function initialize(svg,data){
    else if(action.id==='question-prev'&&question>0){question--;update();}
    else if(action.id==='question-next'&&answers[question]!==null){if(question<6){question++;update();}else connect().catch(console.error);}
   }else if(phase==='connect'&&Number(action.dataset.dot)===nextDot){
-   nextDot++;const points=data.dots[room].slice(0,nextDot-1);if(nextDot===22&&data.closedOutline)points.push(points[0]);
+   nextDot++;const points=data.dots[room].slice(0,nextDot-1);if(nextDot===connectionCount()+1&&data.closedOutline)points.push(points[0]);
    const drawn=extendConnection(points);
-   if(nextDot===22)phase='finishing';update();
+   if(nextDot===connectionCount()+1)phase='finishing';update();
    if(phase==='connect')dots[nextDot-1]?.focus();
    else drawn.then(done=>{if(done&&phase==='finishing'){phase='connected';update();$('#result-show')?.focus();}});
   }else if(phase==='connected'&&action.id==='result-show'){phase='result';update();revealResult();}
