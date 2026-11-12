@@ -52,21 +52,11 @@ function initialize(svg,items){
   }
  }
  const attributes={x:'-50%',y:'-50%',width:'200%',height:'200%','color-interpolation-filters':'sRGB',primitiveUnits:'userSpaceOnUse'};
- // A rounded alpha expansion uses a handful of primitives, not dozens of offset copies.
- const paper=el('filter',{id:'pickup-paper',...attributes},[
-  el('feMorphology',{in:'SourceAlpha',operator:'dilate',radius:6,result:'expanded'}),
-  el('feGaussianBlur',{in:'expanded',stdDeviation:2,result:'soft'}),
-  el('feColorMatrix',{in:'soft',type:'matrix',values:'0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 20 -7',result:'paper'}),
-  el('feMorphology',{in:'paper',operator:'dilate',radius:2,result:'edge'}),
-  el('feFlood',{'flood-color':'#351e28',result:'ink'}),el('feComposite',{in:'ink',in2:'edge',operator:'in',result:'outline'}),
-  el('feFlood',{'flood-color':'#fff',result:'white'}),el('feComposite',{in:'white',in2:'paper',operator:'in',result:'backing'}),
-  el('feMerge',{},['outline','backing','SourceGraphic'].map(v=>el('feMergeNode',{in:v})))
- ]);
  const shadow=el('filter',{id:'common-shadow',...attributes},[
   el('feGaussianBlur',{in:'SourceAlpha',stdDeviation:5,result:'blur'}),el('feOffset',{in:'blur',dx:2,dy:2,result:'offset'}),
   el('feFlood',{'flood-color':'#000','flood-opacity':.25,result:'color'}),el('feComposite',{in:'color',in2:'offset',operator:'in'})
  ]);
- defs.append(paper,shadow);
+ defs.append(shadow);
  for(const panel of svg.querySelectorAll('[data-shadow-panel]')) {
   if(panel.id)panel.before(el('g',{class:'shadow-only',filter:'url(#common-shadow)'},[use(panel.id)]));
  }
@@ -79,13 +69,47 @@ function initialize(svg,items){
   const clip=el('clipPath',{id:`cells-${item.id}-${rotation}`,clipPathUnits:'userSpaceOnUse'},layout.cells.map(([c,r])=>el('rect',{x:c*BOARD.cellWidth,y:r*BOARD.cellHeight,width:BOARD.cellWidth,height:BOARD.cellHeight})));
   defs.append(clip);
  }
+ const paperCache=new Map();
+ function paperArtwork(item,rotation){
+  const key=`${item.id}:${rotation}`;if(paperCache.has(key))return paperCache.get(key);
+  const layout=artLayout(item,rotation),id=`paper-${item.id}-${rotation}`,layers=[];
+  const sourceShapes=layout.parts.flatMap(part=>[...$(`#${part.id}`).querySelectorAll('path,rect,circle,ellipse,polygon,polyline,line')]);
+  const ink=sourceShapes.map(node=>getComputedStyle(node).stroke).find(color=>color!=='none'&&color!=='rgba(0, 0, 0, 0)')||(round===3?'#000':'#351e28');
+  // Two vector silhouettes form a smooth 2-unit outline around an 8-unit backing.
+  // Source artwork is drawn separately, so no raster filter can distort its seams.
+  for(const [color,width]of [[ink,20],['#fff',16]]){
+   const layer=el('g');
+   for(const part of layout.parts){
+    const source=$(`#${part.id}`),copy=source.cloneNode(true);
+    const originals=[source,...source.querySelectorAll('*')],copies=[copy,...copy.querySelectorAll('*')];
+    for(let i=0;i<copies.length;i++){
+     const node=copies[i];node.removeAttribute('id');
+     if(!['path','rect','circle','ellipse','polygon','polyline','line','text','tspan'].includes(node.localName))continue;
+     const paint=getComputedStyle(originals[i]);
+     node.style.setProperty('fill',paint.fill==='none'?'none':color,'important');
+     node.style.setProperty('stroke',color,'important');
+     node.style.setProperty('stroke-width',String(width),'important');
+     node.style.setProperty('stroke-linejoin','round','important');
+     node.style.setProperty('stroke-linecap','round','important');
+     node.style.setProperty('filter','none','important');
+    }
+    layer.append(el('g',{transform:part.transform},[copy]));
+   }
+   layers.push(layer);
+  }
+  defs.append(el('g',{id},layers));paperCache.set(key,id);return id;
+ }
  const updateMatrix=()=>{inverse=svg.getScreenCTM()?.inverse();positionHeld();};
  const svgPoint=(x,y)=>new DOMPoint(x,y).matrixTransform(inverse||svg.getScreenCTM().inverse());
  function track(event){pointer={x:event.clientX,y:event.clientY};if(state.held&&!raf)raf=requestAnimationFrame(()=>{raf=0;positionHeld();});}
  function positionHeld(){if(!state.held||!pointer)return;const p=svgPoint(pointer.x,pointer.y),a=artLayout(byId.get(state.held),state.rotations[state.held]);$('#held-item').setAttribute('transform',`translate(${p.x-a.centerX} ${p.y-a.centerY})`);}
  function renderPiece(item,p){
   const origin=`translate(${BOARD.x+p.col*BOARD.cellWidth} ${BOARD.y+p.row*BOARD.cellHeight})`,a=artLayout(item,p.rotation);
-  const viewport=el('svg',{x:0,y:0,width:a.pixelWidth,height:a.pixelHeight,viewBox:`0 0 ${item.width*BOARD.cellWidth} ${item.height*BOARD.cellHeight}`,preserveAspectRatio:'xMidYMid slice',overflow:'hidden'},[use(`photo-${item.id}`)]);
+  // Round 3 uses the native texture directly, so a rotated long piece never
+  // magnifies an already-cropped horizontal image. Round 2 keeps its source mapping.
+  const viewport=item.texture
+   ?el('image',{href:item.texture,x:0,y:0,width:a.pixelWidth,height:a.pixelHeight,preserveAspectRatio:'xMidYMid slice'})
+   :el('svg',{x:0,y:0,width:a.pixelWidth,height:a.pixelHeight,viewBox:`0 0 ${item.width*BOARD.cellWidth} ${item.height*BOARD.cellHeight}`,preserveAspectRatio:'xMidYMid slice',overflow:'hidden'},[use(`photo-${item.id}`)]);
   const texture=el('g',{'data-texture':item.id,transform:origin},[el('g',{'clip-path':`url(#cells-${item.id}-${p.rotation})`},[viewport])]);
   const piece=el('g',{'data-placed':item.id,transform:origin,role:'button',tabindex:0,'aria-label':`${item.name} 집기`},[
    ...a.cells.map(([c,r])=>el('rect',{x:c*BOARD.cellWidth,y:r*BOARD.cellHeight,width:BOARD.cellWidth,height:BOARD.cellHeight,fill:'transparent'})),
@@ -118,7 +142,7 @@ function initialize(svg,items){
   svg.dataset.complete=String(complete);svg.dataset.held=state.held||'';
   svg.classList.toggle('holding',!!state.held);
   const key=state.held?`${state.held}:${state.rotations[state.held]}`:'';
-  if(key!==heldKey){heldKey=key;const held=$('#held-item');held.replaceChildren();if(key){const id=artCache.get(key);held.append(el('g',{class:'shadow-only',filter:'url(#common-shadow)'},[use(id)]),el('g',{class:'pickup-paper'},[use(id)]));}show(held,!!key);}
+  if(key!==heldKey){heldKey=key;const held=$('#held-item');held.replaceChildren();if(key){const id=artCache.get(key),paperId=paperArtwork(byId.get(state.held),state.rotations[state.held]);held.append(el('g',{class:'shadow-only',filter:'url(#common-shadow)'},[use(paperId)]),el('g',{class:'pickup-paper-vector'},[use(paperId)]),el('g',{class:'held-art'},[use(id)]));}show(held,!!key);}
   positionHeld();
   const completedRoom=$('#room-complete')||$('#room-finish');
   show($('#room-start'),!complete||!completedRoom);show(completedRoom,complete);show($('#room-additions'),!complete||!completedRoom);

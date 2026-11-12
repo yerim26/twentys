@@ -47,6 +47,7 @@
         72.269775390625
       ],
       "initialRotation": 0,
+      "texture": "round3/assets/textures/5fdc6c563d9f7aa7.png",
       "parts": [
         {
           "id": "art-folder-0",
@@ -142,7 +143,8 @@
         88.56103515625,
         76.147705078125
       ],
-      "initialRotation": 0
+      "initialRotation": 0,
+      "texture": "round3/assets/textures/f9bc4f4627d8e8b4.png"
     },
     {
       "id": "resume",
@@ -183,7 +185,8 @@
         78.89013671875,
         94.7900390625
       ],
-      "initialRotation": 0
+      "initialRotation": 0,
+      "texture": "round3/assets/textures/034002231caa8eed.png"
     },
     {
       "id": "bird",
@@ -224,7 +227,8 @@
         127.32958984375,
         92.395751953125
       ],
-      "initialRotation": 0
+      "initialRotation": 0,
+      "texture": "round3/assets/textures/d5903f1c17922e14.png"
     },
     {
       "id": "coins",
@@ -257,7 +261,8 @@
         72.03857421875,
         149.072509765625
       ],
-      "initialRotation": 0
+      "initialRotation": 0,
+      "texture": "round3/assets/textures/2c528737188382e4.png"
     },
     {
       "id": "star",
@@ -286,7 +291,8 @@
         83.9736328125,
         82.932861328125
       ],
-      "initialRotation": 0
+      "initialRotation": 0,
+      "texture": "round3/assets/textures/2eec0e589fa359da.png"
     },
     {
       "id": "marker",
@@ -308,10 +314,10 @@
         0
       ],
       "art": [
-        56.50001953124956,
-        61.889631328408534,
-        63.83984375,
-        209.77599127631868
+        57.219999999999345,
+        49.85608809911151,
+        63.12,
+        221.80953572769363
       ],
       "tray": [
         1593.56005859375,
@@ -319,7 +325,8 @@
         121.18701171875,
         34.395751953125
       ],
-      "initialRotation": 90
+      "initialRotation": 90,
+      "texture": "round3/assets/textures/86c44dedfd6f5010.png"
     },
     {
       "id": "pen",
@@ -360,7 +367,8 @@
         305.14013671875,
         20.0400390625
       ],
-      "initialRotation": 0
+      "initialRotation": 0,
+      "texture": "round3/assets/textures/pen-wood.png"
     },
     {
       "id": "mountain",
@@ -389,7 +397,8 @@
         90.5,
         82.5107421875
       ],
-      "initialRotation": 0
+      "initialRotation": 0,
+      "texture": "round3/assets/textures/fce89205014e2d1d.png"
     }
   ],
   "source_sha256": "a0277ac89c8f6d9628ce8adb61b5f2a746280636ed0d243eeaa8b130c938fe12"
