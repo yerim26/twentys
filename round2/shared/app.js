@@ -8,7 +8,7 @@ const use=id=>el('use',{href:`#${id}`});
 const show=(node,visible)=>node?.toggleAttribute('hidden',!visible);
 const parameters=new URL(location.href).searchParams;
 const round=parameters.get('round')==='3'||(!parameters.has('round')&&parameters.get('stage')==='2')?3:2;
-const requested=parameters.get('room');
+const requested=parameters.get('room')==='wooki'?'workki':parameters.get('room');
 const room=['workki','zibi','eddie'].includes(requested)?requested:'workki';
 try {
  const directory=round===3?'round3':'rooms';

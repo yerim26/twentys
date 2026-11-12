@@ -29,7 +29,7 @@ function showStage() {
   const legacyStage = !requestedRound && ['1', '2'].includes(params.get('stage'));
   if (!legacyStage) {
     const round = ['2', '3'].includes(requestedRound) ? requestedRound : '1';
-    const requestedRoom = params.get('room');
+    const requestedRoom = params.get('room') === 'wooki' ? 'workki' : params.get('room');
     const room = ['workki', 'zibi', 'eddie'].includes(requestedRoom) ? requestedRoom : 'workki';
     const target = new URL('round2/index.html', location.href);
     target.searchParams.set('round', round);

@@ -92,7 +92,7 @@ function initialize(svg,data){
    const role=target.dataset.resultEntry,order=Number(target.dataset.resultOrder)||0;
    const timing=role==='character'?[0,600]:role==='title'?[150,450]:role==='description'?[Math.min(600,300+order*100),400]:role==='actions'?[650,350]:[400,420];
    const transform=role==='character'?'translateY(10px)':role==='title'?'scale(.985)':role==='description'?'translateY(6px)':role==='actions'?'translateY(0)':'scale(.96)';
-   const animation=target.animate([{transform,opacity:0},{transform:'translateY(0) scale(1)',opacity:1}],{delay:timing[0],duration:timing[1],fill:'backwards',easing:'cubic-bezier(.2,.8,.2,1)'});
+   const animation=target.animate([{transform,opacity:0},{transform:'translateY(0) scale(1)',opacity:1}],{delay:timing[0]*1.3,duration:timing[1]*1.3,fill:'backwards',easing:'cubic-bezier(.2,.8,.2,1)'});
    animation.id=`result-${role}-enter`;running.push(animation.finished);
   }
   Promise.allSettled(running).then(()=>{if(phase==='result')$('#continue')?.focus();});
