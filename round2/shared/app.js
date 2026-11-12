@@ -28,9 +28,9 @@ function initialize(svg,items){
  // The completion card belongs only to Round 3; Round 2 ends on its final line.
  if(round===2)$('#completion')?.remove();
  let state=game.initial(),pointer=null,inverse=null,raf=0,heldKey='',revision=0,endTimer=0,popupTimer=0,returnTimer=0;
- const rendered=new Map(),artCache=new Map();
+ const rendered=new Map(),artCache=new Map();let cancelSpeech=()=>{},progressTarget=-1,progressAnimation=null;
  const characterMotion=installRoomCharacterMotion(svg,{room});
- window.addEventListener('pagehide',()=>characterMotion.dispose(),{once:true});
+ window.addEventListener('pagehide',()=>{cancelSpeech();characterMotion.dispose();},{once:true});
  let completionOpen=false,returnFocus=null;
  const savedTabIndexes=new Map();
  function setCompletion(open){
@@ -101,6 +101,26 @@ function initialize(svg,items){
   }
   defs.append(el('g',{id},layers));paperCache.set(key,id);return id;
  }
+ for(const original of svg.querySelectorAll('[data-item] .tray-original')){
+  const visual=el('g',{class:'tray-hover-visual'});original.before(visual);visual.append(original);
+ }
+ const resetVisuals=[];
+ for(const source of svg.querySelectorAll('[data-reset-visual]')){
+  const visual=el('g',{class:'reset-hover-visual'});source.before(visual);visual.append(source);resetVisuals.push(visual);
+ }
+ const reset=$('#reset'),resetState=(name,active)=>resetVisuals.forEach(node=>node.classList.toggle(name,active));
+ reset?.addEventListener('pointerenter',()=>resetState('is-hovered',true));
+ reset?.addEventListener('pointerleave',()=>{resetState('is-hovered',false);resetState('is-active',false);});
+ reset?.addEventListener('pointerdown',()=>resetState('is-active',true));reset?.addEventListener('pointerup',()=>resetState('is-active',false));reset?.addEventListener('pointercancel',()=>resetState('is-active',false));
+ reset?.addEventListener('focus',()=>resetState('is-focused',reset.matches(':focus-visible')));reset?.addEventListener('blur',()=>resetState('is-focused',false));
+ function updateProgress(count){
+  const fill=$('#progress-fill');if(!fill)return;
+  const target=(Number(fill.dataset.fullWidth)||243.73)*count/items.length;if(target===progressTarget)return;
+  const current=Number.parseFloat(getComputedStyle(fill).width)||0;progressTarget=target;progressAnimation?.cancel();fill.setAttribute('width',target);
+  if(count>0&&!matchMedia('(prefers-reduced-motion: reduce)').matches&&Math.abs(current-target)>.01){
+   progressAnimation=fill.animate([{width:`${current}px`},{width:`${target}px`}],{duration:400,easing:'cubic-bezier(.2,.8,.2,1)'});progressAnimation.id='puzzle-progress-fill';
+  }
+ }
  const updateMatrix=()=>{inverse=svg.getScreenCTM()?.inverse();positionHeld();};
  const svgPoint=(x,y)=>new DOMPoint(x,y).matrixTransform(inverse||svg.getScreenCTM().inverse());
  function track(event){pointer={x:event.clientX,y:event.clientY};if(state.held&&!raf)raf=requestAnimationFrame(()=>{raf=0;positionHeld();});}
@@ -121,11 +141,26 @@ function initialize(svg,items){
   rendered.set(item.id,{key:JSON.stringify(p),texture,piece});
  }
  function dialogue(kind,animate){
-  const speech=$('#speech');if(!speech||!$(`#dialogue-${kind}`))return;
-  speech.getAnimations().forEach(a=>a.cancel());
+  const speech=$('#speech');if(!speech||!$(`#dialogue-${kind}`))return Promise.resolve(false);
+  cancelSpeech();speech.getAnimations().forEach(a=>a.cancel());
   if(speech.dataset.popOrigin){const [x,y]=speech.dataset.popOrigin.split(/[, ]+/).map(Number);if(Number.isFinite(x)&&Number.isFinite(y))speech.style.transformOrigin=`${x}px ${y}px`;}
-  speech.replaceChildren(use(`dialogue-${kind}`));speech.dataset.dialogue=kind;
-  if(animate&&!matchMedia('(prefers-reduced-motion: reduce)').matches)speech.animate([{transform:'scale(.04,.04)',opacity:0},{transform:'scale(1.035,1.06)',opacity:1,offset:.7},{transform:'scale(1)',opacity:1}],{duration:1020,easing:'cubic-bezier(.2,.8,.2,1)'});
+  speech.replaceChildren(use(`dialogue-${kind}`));speech.dataset.dialogue=kind;show(speech,true);
+  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches,duration=reduced?0:animate?1020:420;
+  speech.dataset.entryDuration=String(duration);speech.dataset.speechPhase='entering';
+  let entry=null,hideTimer=0,settled=false,resolve;
+  const finished=new Promise(done=>{resolve=done;});
+  cancelSpeech=()=>{clearTimeout(hideTimer);entry?.cancel();if(!settled){settled=true;resolve(false);}};
+  const entered=()=>{
+   if(settled)return;speech.dataset.speechPhase='shown';
+   hideTimer=setTimeout(()=>{if(settled)return;show(speech,false);speech.dataset.speechPhase='hidden';settled=true;resolve(true);},2000);
+  };
+  if(duration){
+   const frames=animate
+    ?[{transform:'translateY(10px) scale(.04,.04)',opacity:0},{transform:'translateY(-1px) scale(1.035,1.06)',opacity:1,offset:.7},{transform:'translateY(0) scale(1)',opacity:1}]
+    :[{transform:'translateY(10px) scale(.98)',opacity:0},{transform:'translateY(0) scale(1)',opacity:1}];
+   entry=speech.animate(frames,{duration,easing:'cubic-bezier(.2,.8,.2,1)'});entry.id='speech-enter';entry.finished.then(entered).catch(()=>{});
+  }else entered();
+  return finished;
  }
  function render(lastPlaced=null){
   ++revision;clearTimeout(endTimer);clearTimeout(popupTimer);setCompletion(false);
@@ -140,7 +175,7 @@ function initialize(svg,items){
   }
   const count=Object.keys(state.placements).length,complete=game.complete(state);
   if($('#progress-count'))$('#progress-count').textContent=`${count}/${items.length}`;
-  const fill=$('#progress-fill');if(fill)fill.setAttribute('width',(Number(fill.dataset.fullWidth)||243.73)*count/items.length);
+  updateProgress(count);
   svg.dataset.complete=String(complete);svg.dataset.held=state.held||'';
   svg.classList.toggle('holding',!!state.held);
   const key=state.held?`${state.held}:${state.rotations[state.held]}`:'';
@@ -155,15 +190,15 @@ function initialize(svg,items){
   }
   if(lastPlaced&&round===3){
    // Read the placed piece's own line, including the ninth piece, before the ending.
-   dialogue($(`#dialogue-${lastPlaced}`)?lastPlaced:'start',true);
+   const finishedSpeech=dialogue($(`#dialogue-${lastPlaced}`)?lastPlaced:'start',true);
    if(complete){
     const version=revision;
-    endTimer=setTimeout(()=>{
-     if(version!==revision||!game.complete(state))return;
+    finishedSpeech.then(shown=>{
+     if(!shown||version!==revision||!game.complete(state))return;
      dialogue('finish',true);characterMotion.complete();
      // This timer starts when the final line appears, independently of motion.
      popupTimer=setTimeout(()=>{if(version===revision&&game.complete(state))setCompletion(true);},3000);
-    },1800);
+    });
    }
   }else if(lastPlaced&&complete){dialogue('finish',true);const version=revision;endTimer=setTimeout(()=>{if(version===revision&&game.complete(state))goToRound(3,room);},4000);}
   else if(!complete&&$('#speech')?.dataset.dialogue==='finish')dialogue('start',false);

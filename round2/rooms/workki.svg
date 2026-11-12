@@ -2269,13 +2269,13 @@
       <path class="cls-78" d="M89.38,669.53l.66,10.82c.11,1.87,1.61,3.37,3.48,3.48l10.82.65-10.82.66c-1.87.11-3.37,1.61-3.48,3.48l-.66,10.82-.65-10.82c-.11-1.87-1.61-3.37-3.48-3.48l-10.82-.66,10.82-.65c1.87-.11,3.37-1.61,3.48-3.48L89.38,669.53Z" />
       <g>
         <g>
-          <g>
+          <text class="cls-379" transform="translate(716.626 1212.8744)"><tspan x="0" y="0">좌클릭 - 놓기</tspan><tspan class="cls-520" x="94.61" y="0">,</tspan><tspan x="99.22" y="0" xml:space="preserve"> 우클릭 - 회전하기</tspan></text>
+        </g>
+        <g data-reset-visual="true"><g>
             <rect class="cls-303" x="1679.84" y="1183.93" width="92.84" height="42.58" rx="21.29" ry="21.29" />
             <text class="cls-379" transform="translate(1700.1079 1212.2118)"><tspan x="0" y="0">RE</tspan></text>
           </g>
-          <text class="cls-379" transform="translate(716.626 1212.8744)"><tspan x="0" y="0">좌클릭 - 놓기</tspan><tspan class="cls-520" x="94.61" y="0">,</tspan><tspan x="99.22" y="0" xml:space="preserve"> 우클릭 - 회전하기</tspan></text>
-        </g>
-        <g>
+          <g>
           <g>
             <path class="cls-128" d="M1731.52,1204.36c.97-5.15,4.48-9.53,10-10.11,2.91-.31,5.42.56,7.51,2.1" />
             <polygon class="cls-382" points="1744.17 1198.88 1753.7 1201.81 1751.48 1192.09 1744.17 1198.88" />
@@ -2285,7 +2285,7 @@
             <polygon class="cls-382" points="1741.05 1211.56 1731.52 1208.63 1733.75 1218.35 1741.05 1211.56" />
           </g>
         </g>
-      </g>
+      </g></g>
       <text class="cls-380" transform="translate(84.74 461.94)"><tspan class="cls-384"><tspan x="0" y="0">Round 2</tspan></tspan><tspan class="cls-299"><tspan x="0" y="60">독립</tspan></tspan></text>
       <line class="cls-370" x1="475.25" y1="427.3" x2="475.25" y2="607.16" />
       <text class="cls-379" transform="translate(84.34 567.57)"><tspan x="0" y="0">처음으로 나만의 공간을 만드는 일은</tspan><tspan class="cls-520" x="251.42" y="0">.</tspan><tspan x="0" y="21.6">설레지만</tspan><tspan class="cls-520" x="62.23" y="21.6">,</tspan><tspan x="66.84" y="21.6" xml:space="preserve"> 좁아진 공간에 답답함을 느끼기도 한다</tspan><tspan class="cls-520" x="338.33" y="21.6">.</tspan></text>

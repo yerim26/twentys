@@ -33,6 +33,40 @@ function initialize(svg,data){
   answer.setAttribute('role','button');answer.setAttribute('tabindex','0');
   const circle=answer.querySelector('circle');answer.querySelectorAll('path').forEach(path=>path.remove());
   const label=make('text',{class:'answer-number',x:circle.getAttribute('cx'),y:circle.getAttribute('cy'),'text-anchor':'middle','dominant-baseline':'central','font-family':'Pretendard','font-size':24});circle.parentNode.append(label);
+  const row=make('g',{class:'answer-row','data-answer-row':answer.dataset.answer});
+  row.style.transformOrigin=`375px ${615.52+(Number(answer.dataset.answer)-1)*60}px`;
+  answer.before(row);row.append(answer,$(`#answer-${answer.dataset.answer}-text`));
+ }
+ const resultButton=$('#result-show'),resultVisual=make('g',{class:'result-show-visual'});
+ resultVisual.append(...resultButton.childNodes);resultButton.append(resultVisual);
+ for(const source of $$('[data-result-character],[data-result-reveal]')){
+  const role=source.dataset.resultCharacter?'character':source.dataset.resultReveal;
+  const wrapper=make('g',{'data-result-entry':role,'data-result-order':source.dataset.resultOrder||0});
+  source.before(wrapper);
+  if(role==='actions'){
+   const visual=make('g',{class:'result-action-visual','data-action':source.dataset.resultAction});wrapper.append(visual);visual.append(source);
+  }else wrapper.append(source);
+ }
+ for(const action of ['restart','continue']){
+  const hit=$(`#${action}`);
+  const set=(name,enabled)=>$$(`[data-result="${room}"] .result-action-visual[data-action="${action}"]`).forEach(node=>node.classList.toggle(name,enabled));
+  hit.addEventListener('pointerenter',()=>set('is-hovered',true));hit.addEventListener('pointerleave',()=>{set('is-hovered',false);set('is-active',false);});
+  hit.addEventListener('pointerdown',()=>set('is-active',true));hit.addEventListener('pointerup',()=>set('is-active',false));hit.addEventListener('pointercancel',()=>set('is-active',false));
+  hit.addEventListener('focus',()=>set('is-focused',hit.matches(':focus-visible')));hit.addEventListener('blur',()=>{set('is-focused',false);set('is-active',false);});
+ }
+ function revealResult(){
+  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const entries=$$(`[data-result="${room}"] [data-result-entry]`),running=[];
+  for(const target of entries){
+   target.getAnimations().forEach(animation=>animation.cancel());
+   if(reduced)continue;
+   const role=target.dataset.resultEntry,order=Number(target.dataset.resultOrder)||0;
+   const timing=role==='character'?[0,600]:role==='title'?[150,450]:role==='description'?[Math.min(600,300+order*100),400]:role==='actions'?[650,350]:[400,420];
+   const transform=role==='character'?'translateY(10px)':role==='title'?'scale(.985)':role==='description'?'translateY(6px)':role==='actions'?'translateY(0)':'scale(.96)';
+   const animation=target.animate([{transform,opacity:0},{transform:'translateY(0) scale(1)',opacity:1}],{delay:timing[0],duration:timing[1],fill:'backwards',easing:'cubic-bezier(.2,.8,.2,1)'});
+   animation.id=`result-${role}-enter`;running.push(animation.finished);
+  }
+  Promise.allSettled(running).then(()=>{if(phase==='result')$('#continue')?.focus();});
  }
 
  const measure=document.createElement('canvas').getContext('2d');
@@ -65,7 +99,7 @@ function initialize(svg,data){
   text('#question-number',`Q${question+1}.`);text('#question-text',item.text||item.question||`[임시] 질문 ${question+1}`);
   for(let n=1;n<=3;n++){
    text(`#answer-${n}-text`,item.answers?.[n-1]||`임시 답변 ${n}`);show($(`#answer-${n}-text`),!result);$(`#answer-${n}-text`).dataset.answerTarget=String(n);
-   const control=$(`[data-answer="${n}"]`);show(control,!result);control?.setAttribute('tabindex',survey?'0':'-1');control?.setAttribute('aria-pressed',String(answers[question]===n));control?.classList.toggle('answer-selected',answers[question]===n);
+   const control=$(`[data-answer="${n}"]`);control.closest('.answer-row').dataset.enabled=String(survey);show(control,!result);control?.setAttribute('tabindex',survey?'0':'-1');control?.setAttribute('aria-pressed',String(answers[question]===n));control?.classList.toggle('answer-selected',answers[question]===n);
    const number=question*3+n,label=control.querySelector('.answer-number');label.textContent=String(number);label.setAttribute('font-size',number<10?24:19);control.setAttribute('aria-label',`${number}번 답변: ${item.answers?.[n-1]||''}`);
   }
   show($('#question-prev'),survey);show($('#question-next'),survey);
@@ -100,7 +134,7 @@ function initialize(svg,data){
   }else if(phase==='connect'&&Number(action.dataset.dot)===nextDot){
    nextDot++;const points=data.dots[room].slice(0,nextDot-1);if(nextDot===22&&data.closedOutline)points.push(points[0]);lines.setAttribute('points',points.map(point=>point.join(',')).join(' '));
    if(nextDot===22)phase='connected';update();if(phase==='connect')dots[nextDot-1]?.focus();else $('#result-show')?.focus();
-  }else if(phase==='connected'&&action.id==='result-show'){phase='result';update();$('#continue')?.focus();}
+  }else if(phase==='connected'&&action.id==='result-show'){phase='result';update();revealResult();}
   else if(phase==='result'&&action.id==='restart')goToRound(1);
   else if(phase==='result'&&action.id==='continue')goToRound(2,room);
  }

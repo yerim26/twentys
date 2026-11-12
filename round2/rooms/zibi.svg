@@ -2268,13 +2268,13 @@
       </g>
       <g>
         <g>
-          <g>
+          <text class="cls-379" transform="translate(4676.7336 1214.4579)"><tspan x="0" y="0">좌클릭 - 놓기</tspan><tspan class="cls-520" x="94.61" y="0">,</tspan><tspan x="99.22" y="0" xml:space="preserve"> 우클릭 - 회전하기</tspan></text>
+        </g>
+        <g data-reset-visual="true"><g>
             <rect class="cls-303" x="5639.95" y="1185.51" width="92.84" height="42.58" rx="21.29" ry="21.29" />
             <text class="cls-379" transform="translate(5660.2158 1213.7953)"><tspan x="0" y="0">RE</tspan></text>
           </g>
-          <text class="cls-379" transform="translate(4676.7336 1214.4579)"><tspan x="0" y="0">좌클릭 - 놓기</tspan><tspan class="cls-520" x="94.61" y="0">,</tspan><tspan x="99.22" y="0" xml:space="preserve"> 우클릭 - 회전하기</tspan></text>
-        </g>
-        <g>
+          <g>
           <g>
             <path class="cls-128" d="M5691.63,1205.94c.96-5.14,4.48-9.52,9.99-10.11,2.92-.3,5.43.56,7.52,2.11" />
             <polygon class="cls-382" points="5704.28 1200.46 5713.81 1203.39 5711.59 1193.67 5704.28 1200.46" />
@@ -2284,7 +2284,7 @@
             <polygon class="cls-382" points="5701.16 1213.15 5691.63 1210.21 5693.85 1219.93 5701.16 1213.15" />
           </g>
         </g>
-      </g>
+      </g></g>
       <g class="cls-428" id="panel-87" data-shadow-panel="true">
         <rect class="cls-363" x="4011.81" y="641.36" width="561.91" height="748.01" />
       </g>

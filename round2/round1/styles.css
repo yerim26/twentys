@@ -12,3 +12,18 @@
 [data-answer] circle{fill:transparent!important;stroke:#000!important;stroke-width:1!important}[data-answer] path,[data-answer] .answer-number{fill:#000!important}[data-answer][aria-pressed=true] circle{fill:#000!important}[data-answer][aria-pressed=true] path,[data-answer][aria-pressed=true] .answer-number{fill:#fff!important}
 
 [data-answer-target]{cursor:pointer}
+
+.answer-row{transform-box:view-box;transition:transform 160ms ease-out}
+.answer-row[data-enabled=true]:hover,.answer-row[data-enabled=true]:has(:focus-visible){transform:scale(1.025)}
+.result-show-visual{transform-box:fill-box;transform-origin:center;transition:transform 160ms ease-out}
+#result-show:hover .result-show-visual,#result-show:focus-visible .result-show-visual{transform:scale(1.04)}
+#result-show:active .result-show-visual{transform:scale(.985)}
+#result-show:active .result-show-visual rect:not(.hit-target){fill:#e2d7cc!important}
+@media(prefers-reduced-motion:reduce){.answer-row,.result-show-visual{transition:none;transform:none!important}}
+
+[data-result-entry]{transform-box:fill-box;transform-origin:center}
+.result-action-visual{transform-box:fill-box;transform-origin:center;transition:transform 160ms ease-out}
+.result-action-visual.is-hovered,.result-action-visual.is-focused{transform:scale(1.04)}
+.result-action-visual.is-active{transform:scale(.985)}
+.result-action-visual.is-active rect:not(.hit-target){fill:#e2d7cc!important}
+@media(prefers-reduced-motion:reduce){.result-action-visual{transition:none;transform:none!important}}

@@ -2311,13 +2311,13 @@
       <text class="cls-379" transform="translate(2851.7983 1611.8752)"><tspan x="0" y="0">모든 짐을 알맞은 위치에 배치해 보세요</tspan><tspan class="cls-520" x="271.49" y="0">.</tspan></text>
       <g>
         <g>
-          <g>
+          <text class="cls-379" transform="translate(2696.626 2352.8744)"><tspan x="0" y="0">좌클릭 - 놓기</tspan><tspan class="cls-520" x="94.61" y="0">,</tspan><tspan x="99.22" y="0" xml:space="preserve"> 우클릭 - 회전하기</tspan></text>
+        </g>
+        <g data-reset-visual="true"><g>
             <rect class="cls-303" x="3659.84" y="2323.93" width="92.84" height="42.58" rx="21.29" ry="21.29" />
             <text class="cls-379" transform="translate(3680.1079 2352.2118)"><tspan x="0" y="0">RE</tspan></text>
           </g>
-          <text class="cls-379" transform="translate(2696.626 2352.8744)"><tspan x="0" y="0">좌클릭 - 놓기</tspan><tspan class="cls-520" x="94.61" y="0">,</tspan><tspan x="99.22" y="0" xml:space="preserve"> 우클릭 - 회전하기</tspan></text>
-        </g>
-        <g>
+          <g>
           <g>
             <path class="cls-128" d="M3711.52,2344.36c.97-5.15,4.48-9.53,10-10.11,2.91-.31,5.42.56,7.51,2.1" />
             <polygon class="cls-382" points="3724.17 2338.88 3733.7 2341.81 3731.48 2332.09 3724.17 2338.88" />
@@ -2327,7 +2327,7 @@
             <polygon class="cls-382" points="3721.05 2351.56 3711.52 2348.63 3713.75 2358.35 3721.05 2351.56" />
           </g>
         </g>
-      </g>
+      </g></g>
       <text class="cls-379" transform="translate(2064.3411 1707.572)"><tspan x="0" y="0">처음으로 나만의 공간을 만드는 일은</tspan><tspan class="cls-520" x="251.42" y="0">.</tspan><tspan x="0" y="21.6">설레지만</tspan><tspan class="cls-520" x="62.23" y="21.6">,</tspan><tspan x="66.84" y="21.6" xml:space="preserve"> 좁아진 공간에 답답함을 느끼기도 한다</tspan><tspan class="cls-520" x="338.33" y="21.6">.</tspan></text>
       <g>
         <rect class="cls-358" x="2697.57" y="1588.51" width="115.74" height="42.58" rx="21.29" ry="21.29" />
