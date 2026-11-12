@@ -17,6 +17,7 @@ try {
  const [source,data]=await Promise.all([responses[0].text(),responses[1].json()]);
  const svg=new DOMParser().parseFromString(source,'image/svg+xml').documentElement;
  if(svg.tagName!=='svg')throw new Error('방 그림 형식이 올바르지 않습니다.');
+ svg.querySelector('#speech')?.setAttribute('hidden','');
  document.querySelector('#game').replaceChildren(document.importNode(svg,true));
  document.title=`${data.name||room} · Round ${round} ${round===3?'경험과 성장':'독립'} — Twentys`;
  await document.fonts.ready;
@@ -113,6 +114,15 @@ function initialize(svg,items){
  reset?.addEventListener('pointerleave',()=>{resetState('is-hovered',false);resetState('is-active',false);});
  reset?.addEventListener('pointerdown',()=>resetState('is-active',true));reset?.addEventListener('pointerup',()=>resetState('is-active',false));reset?.addEventListener('pointercancel',()=>resetState('is-active',false));
  reset?.addEventListener('focus',()=>resetState('is-focused',reset.matches(':focus-visible')));reset?.addEventListener('blur',()=>resetState('is-focused',false));
+ const completionVisuals=[];
+ for(const source of svg.querySelectorAll('[data-completion-button]')){
+  const visual=el('g',{class:'completion-button-visual'});source.before(visual);visual.append(source);completionVisuals.push(visual);
+ }
+ const completionButton=$('#completion-next'),completionState=(name,active)=>completionVisuals.forEach(node=>node.classList.toggle(name,active));
+ completionButton?.addEventListener('pointerenter',()=>completionState('is-hovered',true));
+ completionButton?.addEventListener('pointerleave',()=>{completionState('is-hovered',false);completionState('is-active',false);});
+ completionButton?.addEventListener('pointerdown',()=>completionState('is-active',true));completionButton?.addEventListener('pointerup',()=>completionState('is-active',false));completionButton?.addEventListener('pointercancel',()=>completionState('is-active',false));
+ completionButton?.addEventListener('focus',()=>completionState('is-focused',completionButton.matches(':focus-visible')));completionButton?.addEventListener('blur',()=>completionState('is-focused',false));
  function updateProgress(count){
   const fill=$('#progress-fill');if(!fill)return;
   const target=(Number(fill.dataset.fullWidth)||243.73)*count/items.length;if(target===progressTarget)return;
@@ -140,26 +150,32 @@ function initialize(svg,items){
   $('#board-textures').append(texture);$('#placed-items').append(piece);
   rendered.set(item.id,{key:JSON.stringify(p),texture,piece});
  }
- function dialogue(kind,animate){
+ function dialogue(kind,animate,delay=0){
   const speech=$('#speech');if(!speech||!$(`#dialogue-${kind}`))return Promise.resolve(false);
   cancelSpeech();speech.getAnimations().forEach(a=>a.cancel());
   if(speech.dataset.popOrigin){const [x,y]=speech.dataset.popOrigin.split(/[, ]+/).map(Number);if(Number.isFinite(x)&&Number.isFinite(y))speech.style.transformOrigin=`${x}px ${y}px`;}
-  speech.replaceChildren(use(`dialogue-${kind}`));speech.dataset.dialogue=kind;show(speech,true);
-  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches,duration=reduced?0:animate?1020:420;
-  speech.dataset.entryDuration=String(duration);speech.dataset.speechPhase='entering';
-  let entry=null,hideTimer=0,settled=false,resolve;
+  speech.replaceChildren(use(`dialogue-${kind}`));speech.dataset.dialogue=kind;show(speech,false);
+  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches,duration=reduced?0:animate?(kind==='finish'?600:1020):420,exitDuration=reduced?0:220;
+  speech.dataset.entryDuration=String(duration);speech.dataset.exitDuration=String(exitDuration);speech.dataset.delayDuration=String(delay);speech.dataset.speechPhase=delay?'waiting':'entering';
+  let entry=null,exit=null,delayTimer=0,hideTimer=0,settled=false,resolve;
   const finished=new Promise(done=>{resolve=done;});
-  cancelSpeech=()=>{clearTimeout(hideTimer);entry?.cancel();if(!settled){settled=true;resolve(false);}};
-  const entered=()=>{
-   if(settled)return;speech.dataset.speechPhase='shown';
-   hideTimer=setTimeout(()=>{if(settled)return;show(speech,false);speech.dataset.speechPhase='hidden';settled=true;resolve(true);},2000);
+  cancelSpeech=()=>{clearTimeout(delayTimer);clearTimeout(hideTimer);entry?.cancel();exit?.cancel();if(!settled){settled=true;resolve(false);}};
+  const hidden=()=>{if(settled)return;show(speech,false);speech.dataset.speechPhase='hidden';settled=true;resolve(true);};
+  const leave=()=>{
+   if(settled)return;speech.dataset.speechPhase='exiting';
+   if(exitDuration){exit=speech.animate([{transform:'translateY(0) scale(1)',opacity:1},{transform:'translateY(4px) scale(.08)',opacity:0}],{duration:exitDuration,easing:'cubic-bezier(.4,0,1,1)'});exit.id='speech-exit';exit.finished.then(hidden).catch(()=>{});}else hidden();
   };
-  if(duration){
-   const frames=animate
-    ?[{transform:'translateY(10px) scale(.04,.04)',opacity:0},{transform:'translateY(-1px) scale(1.035,1.06)',opacity:1,offset:.7},{transform:'translateY(0) scale(1)',opacity:1}]
-    :[{transform:'translateY(10px) scale(.98)',opacity:0},{transform:'translateY(0) scale(1)',opacity:1}];
-   entry=speech.animate(frames,{duration,easing:'cubic-bezier(.2,.8,.2,1)'});entry.id='speech-enter';entry.finished.then(entered).catch(()=>{});
-  }else entered();
+  const entered=()=>{if(settled)return;speech.dataset.speechPhase='shown';hideTimer=setTimeout(leave,2000);};
+  const enter=()=>{
+   if(settled)return;show(speech,true);speech.dataset.speechPhase='entering';
+   if(duration){
+    const frames=animate
+     ?[{transform:'translateY(10px) scale(.04,.04)',opacity:0},{transform:'translateY(-1px) scale(1.035,1.06)',opacity:1,offset:.7},{transform:'translateY(0) scale(1)',opacity:1}]
+     :[{transform:'translateY(10px) scale(.98)',opacity:0},{transform:'translateY(0) scale(1)',opacity:1}];
+    entry=speech.animate(frames,{duration,easing:'cubic-bezier(.2,.8,.2,1)'});entry.id='speech-enter';entry.finished.then(entered).catch(()=>{});
+   }else entered();
+  };
+  if(delay)delayTimer=setTimeout(enter,delay);else enter();
   return finished;
  }
  function render(lastPlaced=null){
@@ -200,7 +216,7 @@ function initialize(svg,items){
      popupTimer=setTimeout(()=>{if(version===revision&&game.complete(state))setCompletion(true);},3000);
     });
    }
-  }else if(lastPlaced&&complete){dialogue('finish',true);const version=revision;endTimer=setTimeout(()=>{if(version===revision&&game.complete(state))goToRound(3,room);},4000);}
+  }else if(lastPlaced&&complete){dialogue('finish',true);const version=revision;endTimer=setTimeout(()=>{if(version===revision&&game.complete(state))goToRound(3,room);},3000);}
   else if(!complete&&$('#speech')?.dataset.dialogue==='finish')dialogue('start',false);
  }
  function resetRound(){state=game.initial();dialogue('start',false);render();}
@@ -236,7 +252,7 @@ function initialize(svg,items){
   const b=target.getBoundingClientRect();if(!state.held)pointer={x:b.x+b.width/2,y:b.y+b.height/2};
   if(pointer)activate(target,svgPoint(pointer.x,pointer.y));
  });
- updateMatrix();dialogue('start',false);render();
+ updateMatrix();dialogue('start',false,1000);render();
  // Read-only state snapshots make browser QA reproducible without bypassing input.
  window.puzzle={room,round,items,getState:()=>structuredClone(state),layout:(id,r)=>artLayout(byId.get(id),r)};
 }

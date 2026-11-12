@@ -39,6 +39,12 @@ function initialize(svg,data){
   row.style.transformOrigin=`375px ${615.52+(Number(answer.dataset.answer)-1)*60}px`;
   answer.before(row);row.append(answer,$(`#answer-${answer.dataset.answer}-text`));
  }
+ const nextQuestion=$('#question-next'),nextVisual=make('g',{class:'question-next-visual'});
+ for(const child of [...nextQuestion.children])if(!child.classList.contains('hit-target'))nextVisual.append(child);
+ nextQuestion.prepend(nextVisual);
+ const questionContent=make('g',{id:'question-content',transform:'translate(-10 0)'});
+ $('#question-number').before(questionContent);
+ questionContent.append($('#question-number'),$('#question-text'),...$$('.answer-row'));
  const resultButton=$('#result-show'),resultVisual=make('g',{class:'result-show-visual'});
  resultVisual.append(...resultButton.childNodes);resultButton.append(resultVisual);
  for(const source of $$('[data-result-character],[data-result-reveal]')){

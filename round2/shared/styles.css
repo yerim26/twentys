@@ -11,3 +11,9 @@
 .reset-hover-visual.is-hovered,.reset-hover-visual.is-focused{transform:scale(1.04)}
 .reset-hover-visual.is-active{transform:scale(.985)}
 @media(prefers-reduced-motion:reduce){.tray-hover-visual,.reset-hover-visual{transition:none;transform:none!important}}
+
+.completion-button-visual{transform-box:fill-box;transform-origin:center;transition:transform 160ms ease-out;pointer-events:none}
+.completion-button-visual.is-hovered,.completion-button-visual.is-focused{transform:scale(1.04)}
+.completion-button-visual.is-active{transform:scale(.985)}
+.completion-button-visual.is-active rect{fill:#e2d7cc!important}
+@media(prefers-reduced-motion:reduce){.completion-button-visual{transition:none}}

@@ -3305,7 +3305,7 @@
         <text class="r3-st313" transform="translate(818.7422 1908.5964)"><tspan x="0" y="0">ALL</tspan><tspan x="0" y="30.86">PIECES</tspan><tspan x="0" y="61.71">MATCH!</tspan></text>
         <rect class="r3-st4" x="683.62" y="1883.99" width="89.28" height="88.11" rx="7.64" ry="7.64" />
         <polyline class="r3-st165" points="708.75 1923.5 725.16 1942.89 749.01 1913.06" />
-        <g class="r3-st417">
+        <g data-completion-button="true"><g class="r3-st417">
           <rect class="r3-st289" x="972.44" y="1854.39" width="293.34" height="152.48" />
         </g>
         <g>
@@ -3316,7 +3316,7 @@
         </g>
         <rect class="r3-st30" x="1003.23" y="1885.16" width="89.28" height="88.11" rx="7.64" ry="7.64" />
         <polygon class="r3-st316" points="1028.34 1954.02 1071.51 1929.09 1028.34 1904.16 1028.34 1954.02" />
-        <line class="r3-st238" x1="1026.26" y1="1791.15" x2="1026.26" y2="1791.12" />
+        </g><line class="r3-st238" x1="1026.26" y1="1791.15" x2="1026.26" y2="1791.12" />
         <polygon class="r3-st295" points="570.07 1499.82 756.99 1499.82 756.99 1402.33 571.76 1402.33 629.74 1450.38 570.07 1499.82" />
         <polygon class="r3-st265" points="756.99 1499.82 756.99 1461.16 671.33 1461.16 756.99 1499.82" />
         <polygon class="r3-st295" points="1349.8 1499.82 1162.88 1499.82 1162.88 1402.33 1348.11 1402.33 1290.13 1450.38 1349.8 1499.82" />
