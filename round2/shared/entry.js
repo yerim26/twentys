@@ -1,5 +1,3 @@
-import {installInactivityReset} from './inactivity.js';
-installInactivityReset();
 const params=new URL(location.href).searchParams;
 const round=params.get('round');
 const legacyRound2=!round&&/\/round2(?:\/index\.html)?\/?$/.test(location.pathname);

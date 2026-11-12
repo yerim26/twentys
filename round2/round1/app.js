@@ -1,6 +1,4 @@
 import {goToRound} from '../shared/navigation.js';
-import {installInactivityReset} from '../shared/inactivity.js';
-installInactivityReset();
 const NS='http://www.w3.org/2000/svg';
 const make=(tag,attrs={})=>{const n=document.createElementNS(NS,tag);for(const[k,v]of Object.entries(attrs))n.setAttribute(k,v);return n;};
 const show=(node,yes)=>node?.toggleAttribute('hidden',!yes);
@@ -65,7 +63,9 @@ function initialize(svg,data){
  nextQuestion.prepend(nextVisual);
  const questionContent=make('g',{id:'question-content',transform:'translate(-20 0)'});
  $('#question-number').before(questionContent);
- questionContent.append($('#question-number'),$('#question-text'),...$$('.answer-row'));
+ const answerContent=make('g',{id:'answer-content',transform:'translate(0 -20)'});
+ answerContent.append(...$$('.answer-row'));
+ questionContent.append($('#question-number'),$('#question-text'),answerContent);
  const resultButton=$('#result-show'),resultVisual=make('g',{class:'result-show-visual'});
  resultVisual.append(...resultButton.childNodes);resultButton.append(resultVisual);
  for(const source of $$('[data-result-character],[data-result-reveal]')){
@@ -83,7 +83,15 @@ function initialize(svg,data){
   hit.addEventListener('pointerdown',()=>set('is-active',true));hit.addEventListener('pointerup',()=>set('is-active',false));hit.addEventListener('pointercancel',()=>set('is-active',false));
   hit.addEventListener('focus',()=>set('is-focused',hit.matches(':focus-visible')));hit.addEventListener('blur',()=>{set('is-focused',false);set('is-active',false);});
  }
+ let resultMotionTimer=0,resultMotionRevision=0;
+ const resultMotions=[];
+ function stopResultMotion(){
+  resultMotionRevision++;clearTimeout(resultMotionTimer);
+  resultMotions.splice(0).forEach(animation=>animation.cancel());
+ }
+ window.addEventListener('pagehide',stopResultMotion,{once:true});
  function revealResult(){
+  stopResultMotion();const revision=resultMotionRevision;
   const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
   const entries=$$(`[data-result="${room}"] [data-result-entry]`),running=[];
   for(const target of entries){
@@ -93,9 +101,33 @@ function initialize(svg,data){
    const timing=role==='character'?[0,600]:role==='title'?[150,450]:role==='description'?[Math.min(600,300+order*100),400]:role==='actions'?[650,350]:[400,420];
    const transform=role==='character'?'translateY(10px)':role==='title'?'scale(.985)':role==='description'?'translateY(6px)':role==='actions'?'translateY(0)':'scale(.96)';
    const animation=target.animate([{transform,opacity:0},{transform:'translateY(0) scale(1)',opacity:1}],{delay:timing[0]*1.3,duration:timing[1]*1.3,fill:'backwards',easing:'cubic-bezier(.2,.8,.2,1)'});
-   animation.id=`result-${role}-enter`;running.push(animation.finished);
+   animation.id=`result-${role}-enter`;running.push(animation.finished);resultMotions.push(animation);
   }
-  Promise.allSettled(running).then(()=>{if(phase==='result')$('#continue')?.focus();});
+  Promise.allSettled(running).then(()=>{
+   if(phase!=='result'||revision!==resultMotionRevision)return;
+   $('#continue')?.focus();
+   resultMotionTimer=setTimeout(async()=>{
+    if(phase!=='result'||revision!==resultMotionRevision)return;
+    const outlineDots=$$(`[data-result="${room}"] [data-result-dot]`);
+    const fades=outlineDots.map(dot=>{
+     const fade=dot.animate([{opacity:1},{opacity:0}],{duration:reduced?0:200,fill:'forwards',easing:'ease-out'});
+     fade.id='result-dot-exit';resultMotions.push(fade);return fade.finished;
+    });
+    await Promise.allSettled(fades);
+    if(reduced||phase!=='result'||revision!==resultMotionRevision)return;
+    const character=$(`[data-result="${room}"] [data-result-entry="character"]`);
+    if(!character)return;
+    character.style.transformOrigin='center bottom';
+    const greeting=character.animate([
+     {transform:'rotate(0deg)',offset:0,easing:'ease-in-out'},
+     {transform:'rotate(-3deg)',offset:240/3800,easing:'ease-in-out'},
+     {transform:'rotate(3deg)',offset:560/3800,easing:'ease-in-out'},
+     {transform:'rotate(0deg)',offset:800/3800},
+     {transform:'rotate(0deg)',offset:1}
+    ],{duration:3800,iterations:Infinity,easing:'linear'});
+    greeting.id='result-character-greeting';resultMotions.push(greeting);
+   },1000);
+  });
  }
 
  const measure=document.createElement('canvas').getContext('2d');
