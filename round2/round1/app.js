@@ -29,7 +29,12 @@ function initialize(svg,data){
  }
  const controls=['#question-prev','#question-next','#result-show','#restart','#continue'];
  for(const selector of controls){const n=$(selector);if(n){n.setAttribute('role','button');n.setAttribute('tabindex','0');}}
- for(const answer of $$('[data-answer]')){answer.setAttribute('role','button');answer.setAttribute('tabindex','0');}
+ for(const answer of $$('[data-answer]')){
+  answer.setAttribute('role','button');answer.setAttribute('tabindex','0');
+  const circle=answer.querySelector('circle');answer.querySelectorAll('path').forEach(path=>path.remove());
+  const label=make('text',{class:'answer-number',x:circle.getAttribute('cx'),y:circle.getAttribute('cy'),'text-anchor':'middle','dominant-baseline':'central','font-family':'Pretendard','font-size':24});circle.parentNode.append(label);
+ }
+
  const measure=document.createElement('canvas').getContext('2d');
  function text(selector,value){
   const n=$(selector);if(!n)return;
@@ -43,7 +48,7 @@ function initialize(svg,data){
    if(wrapped.length<=maxLines||size<=18)break;size-=1;
   }while(true);
   n.setAttribute('font-family','Pretendard');n.setAttribute('font-size',size);n.replaceChildren();
-  wrapped.forEach((line,index)=>{const span=make('tspan',{x:n.getAttribute('x'),dy:index===0?0:size*1.12});span.textContent=line;n.append(span);});
+  wrapped.forEach((line,index)=>{const span=make('tspan',{x:n.getAttribute('x'),dy:index===0?(answer?-(wrapped.length-1)*size*.56:0):size*1.12});span.textContent=line;n.append(span);});
  }
 
  function update(){
@@ -51,17 +56,17 @@ function initialize(svg,data){
   const survey=phase==='survey',result=phase==='result';
   show($('#survey-screen'),!result);show($('#connect-screen'),!survey&&!result);show($('#result-screen'),result);
   for(const resultNode of $$('[data-result]'))show(resultNode,resultNode.dataset.result===room);
-  const selected=new Set(answers.flatMap((answer,index)=>answer===null?[]:[index+1+7*(answer-1)]));
+  const selected=new Set(answers.flatMap((answer,index)=>answer===null?[]:[index*3+answer]));
   for(const dot of dots){const number=Number(dot.dataset.dot);dot.classList.toggle('selected-dot',survey&&selected.has(number));dot.classList.toggle('next-dot',phase==='connect'&&number===nextDot);dot.classList.toggle('connected-dot',!survey&&number<nextDot);dot.setAttribute('tabindex',phase==='connect'&&number===nextDot?'0':'-1');dot.setAttribute('aria-disabled',String(phase!=='connect'||number!==nextDot));}
   if(phase==='connect'&&dots[nextDot-1])$('#dots').append(dots[nextDot-1]);
   const item=questions[question]||{text:`[임시] 질문 ${question+1}`,answers:['임시 답변 1','임시 답변 2','임시 답변 3']};
-  const sourceQuestion=question===0&&(item.text||'').replaceAll('\\n','\n').replace(/\s/g,'')==='수업1시간전휴강이공지된다면?';
-  show($('#question-original'),!result&&sourceQuestion);
-  show($('#question-text'),!result&&!sourceQuestion);show($('#question-number'),!result&&!sourceQuestion);
+  show($('#question-original'),false);
+  show($('#question-text'),!result);show($('#question-number'),!result);
   text('#question-number',`Q${question+1}.`);text('#question-text',item.text||item.question||`[임시] 질문 ${question+1}`);
   for(let n=1;n<=3;n++){
-   text(`#answer-${n}-text`,item.answers?.[n-1]||`임시 답변 ${n}`);show($(`#answer-${n}-text`),!result&&!sourceQuestion);
+   text(`#answer-${n}-text`,item.answers?.[n-1]||`임시 답변 ${n}`);show($(`#answer-${n}-text`),!result);$(`#answer-${n}-text`).dataset.answerTarget=String(n);
    const control=$(`[data-answer="${n}"]`);show(control,!result);control?.setAttribute('tabindex',survey?'0':'-1');control?.setAttribute('aria-pressed',String(answers[question]===n));control?.classList.toggle('answer-selected',answers[question]===n);
+   const number=question*3+n,label=control.querySelector('.answer-number');label.textContent=String(number);label.setAttribute('font-size',number<10?24:19);control.setAttribute('aria-label',`${number}번 답변: ${item.answers?.[n-1]||''}`);
   }
   show($('#question-prev'),survey);show($('#question-next'),survey);
   $('#question-prev')?.setAttribute('aria-disabled',String(question===0));$('#question-next')?.setAttribute('aria-disabled',String(answers[question]===null));
@@ -87,9 +92,9 @@ function initialize(svg,data){
   phase='connect';update();dots[0]?.focus();
  }
  function activate(target){
-  const action=target.closest('[data-answer],[data-dot],#question-prev,#question-next,#result-show,#restart,#continue');if(!action)return;
+  const action=target.closest('[data-answer],[data-answer-target],[data-dot],#question-prev,#question-next,#result-show,#restart,#continue');if(!action)return;
   if(phase==='survey'){
-   if(action.dataset.answer){answers[question]=Number(action.dataset.answer);update();}
+   if(action.dataset.answer||action.dataset.answerTarget){answers[question]=Number(action.dataset.answer||action.dataset.answerTarget);update();}
    else if(action.id==='question-prev'&&question>0){question--;update();}
    else if(action.id==='question-next'&&answers[question]!==null){if(question<6){question++;update();}else connect().catch(console.error);}
   }else if(phase==='connect'&&Number(action.dataset.dot)===nextDot){

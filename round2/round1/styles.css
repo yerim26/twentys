@@ -9,4 +9,6 @@
 #connections{pointer-events:none}
 @media(prefers-reduced-motion:reduce){.next-dot .dot-core{animation:none}}
 
-[data-answer] circle{fill:transparent!important;stroke:#000!important;stroke-width:1!important}[data-answer] path{fill:#000!important}[data-answer][aria-pressed=true] circle{fill:#000!important}[data-answer][aria-pressed=true] path{fill:#fff!important}
+[data-answer] circle{fill:transparent!important;stroke:#000!important;stroke-width:1!important}[data-answer] path,[data-answer] .answer-number{fill:#000!important}[data-answer][aria-pressed=true] circle{fill:#000!important}[data-answer][aria-pressed=true] path,[data-answer][aria-pressed=true] .answer-number{fill:#fff!important}
+
+[data-answer-target]{cursor:pointer}
