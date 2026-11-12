@@ -14,12 +14,12 @@
 [data-answer-target]{cursor:pointer}
 
 .answer-row{transform-box:view-box;transition:transform 160ms ease-out}
-.answer-row[data-enabled=true]:hover,.answer-row[data-enabled=true]:has(:focus-visible){transform:scale(1.025)}
+.answer-row[data-enabled=true]:hover,.answer-row[data-enabled=true]:has(:focus-visible){transform:scale(1.05)}
 .result-show-visual{transform-box:fill-box;transform-origin:center;transition:transform 160ms ease-out}
 #result-show:hover .result-show-visual,#result-show:focus-visible .result-show-visual{transform:scale(1.04)}
 #result-show:active .result-show-visual{transform:scale(.985)}
 #result-show:active .result-show-visual rect:not(.hit-target){fill:#e2d7cc!important}
-@media(prefers-reduced-motion:reduce){.answer-row,.result-show-visual{transition:none;transform:none!important}}
+@media(prefers-reduced-motion:reduce){.answer-row{transition:none}.result-show-visual{transition:none;transform:none!important}}
 
 [data-result-entry]{transform-box:fill-box;transform-origin:center}
 .result-action-visual{transform-box:fill-box;transform-origin:center;transition:transform 160ms ease-out}

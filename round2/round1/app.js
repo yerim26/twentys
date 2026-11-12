@@ -34,6 +34,8 @@ function initialize(svg,data){
   const circle=answer.querySelector('circle');answer.querySelectorAll('path').forEach(path=>path.remove());
   const label=make('text',{class:'answer-number',x:circle.getAttribute('cx'),y:circle.getAttribute('cy'),'text-anchor':'middle','dominant-baseline':'central','font-family':'Pretendard','font-size':24});circle.parentNode.append(label);
   const row=make('g',{class:'answer-row','data-answer-row':answer.dataset.answer});
+  const hit=answer.querySelector('.hit-target');
+  if(hit){hit.setAttribute('width','480');hit.setAttribute('y',String(586.52+(Number(answer.dataset.answer)-1)*60));hit.setAttribute('height','58');}
   row.style.transformOrigin=`375px ${615.52+(Number(answer.dataset.answer)-1)*60}px`;
   answer.before(row);row.append(answer,$(`#answer-${answer.dataset.answer}-text`));
  }
