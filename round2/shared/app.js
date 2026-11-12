@@ -12,7 +12,7 @@ const requested=parameters.get('room')==='wooki'?'workki':parameters.get('room')
 const room=['workki','zibi','eddie'].includes(requested)?requested:'workki';
 try {
  const directory=round===3?'round3':'rooms';
- const responses=await Promise.all([fetch(`./${directory}/${room}.svg`),fetch(`./${directory}/${room}.json`)]);
+ const responses=await Promise.all([fetch(`./${directory}/${room}.svg?v=speech-padding-1`),fetch(`./${directory}/${room}.json`)]);
  if(responses.some(r=>!r.ok))throw new Error('방 파일을 불러오지 못했습니다.');
  const [source,data]=await Promise.all([responses[0].text(),responses[1].json()]);
  const svg=new DOMParser().parseFromString(source,'image/svg+xml').documentElement;
