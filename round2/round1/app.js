@@ -19,7 +19,7 @@ function initialize(svg,data){
  const questions=data.questions||[];
  const dots=$$('[data-dot]').sort((a,b)=>Number(a.dataset.dot)-Number(b.dataset.dot));
  const initial=data.originalDots||dots.map(dot=>{const m=dot.transform.baseVal.consolidate()?.matrix;return[m?.e||0,m?.f||0];});
- const lines=make('polyline',{id:'connection-line',fill:'none',stroke:'#351e28','stroke-width':3,'stroke-linejoin':'round','stroke-linecap':'round','pointer-events':'none'});
+ const lines=make('polyline',{id:'connection-line',fill:'none',stroke:'#514840','stroke-width':2,'stroke-linejoin':'round','stroke-linecap':'round','pointer-events':'none'});
  $('#connections').append(lines);
  for(const dot of dots){
   const number=Number(dot.dataset.dot),circle=dot.querySelector('circle');circle?.classList.add('dot-core');
@@ -65,6 +65,8 @@ function initialize(svg,data){
   }
   show($('#question-prev'),survey);show($('#question-next'),survey);
   $('#question-prev')?.setAttribute('aria-disabled',String(question===0));$('#question-next')?.setAttribute('aria-disabled',String(answers[question]===null));
+  lines.setAttribute('fill',phase==='connected'?'#f9f2fc':'none');
+  const progress=$('#dot-progress-fill');if(progress)progress.setAttribute('width',Number(progress.dataset.fullWidth||243.73)*Math.min(nextDot-1,21)/21);
   show($('#result-show'),phase==='connected');show($('#draw-hint'),phase==='connect'||phase==='moving');text('#dot-progress',`${Math.min(nextDot-1,21)}/21`);
  }
  function chooseRoom(){
