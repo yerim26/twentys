@@ -1,0 +1,154 @@
+import {BOARD,artLayout,footprint,createGame} from './game.js';
+import {playPlacement,stopPlacementMotion} from './motion.js';
+const NS='http://www.w3.org/2000/svg';
+const el=(tag,attrs={},children=[])=>{const n=document.createElementNS(NS,tag);for(const[k,v]of Object.entries(attrs))n.setAttribute(k,v);n.append(...children);return n;};
+const use=id=>el('use',{href:`#${id}`});
+const show=(node,visible)=>node?.toggleAttribute('hidden',!visible);
+const requested=new URL(location.href).searchParams.get('room');
+const room=['workki','zibi','eddie'].includes(requested)?requested:'workki';
+try {
+ const responses=await Promise.all([fetch(`./rooms/${room}.svg`),fetch(`./rooms/${room}.json`)]);
+ if(responses.some(r=>!r.ok))throw new Error('방 파일을 불러오지 못했습니다.');
+ const [source,data]=await Promise.all([responses[0].text(),responses[1].json()]);
+ const svg=new DOMParser().parseFromString(source,'image/svg+xml').documentElement;
+ if(svg.tagName!=='svg')throw new Error('방 그림 형식이 올바르지 않습니다.');
+ document.querySelector('#game').replaceChildren(document.importNode(svg,true));
+ document.title=`${data.name||room} · Round 2 독립 — Twentys`;
+ await document.fonts.ready;
+ initialize(document.querySelector('#game-svg'),data.items||data);
+} catch(error) {document.querySelector('#game').textContent=error.message;console.error(error);}
+function initialize(svg,items){
+ const $=s=>svg.querySelector(s),defs=$('defs'),game=createGame(items),byId=new Map(items.map(i=>[i.id,i]));
+ let state=game.initial(),pointer=null,inverse=null,raf=0,heldKey='',revision=0,endTimer=0,popupTimer=0;
+ const rendered=new Map(),artCache=new Map();
+ let completionOpen=false,returnFocus=null;
+ const savedTabIndexes=new Map();
+ function setCompletion(open){
+  const popup=$('#completion');if(!popup)return;
+  if(open===completionOpen)return;
+  completionOpen=open;show(popup,open);
+  if(open){
+   returnFocus=document.activeElement;
+   for(const control of svg.querySelectorAll('[role="button"], [tabindex]')){
+    if(popup.contains(control))continue;
+    savedTabIndexes.set(control,control.getAttribute('tabindex'));control.setAttribute('tabindex','-1');
+   }
+   $('#completion-next')?.focus();
+  }else{
+   for(const [control,value]of savedTabIndexes){if(value===null)control.removeAttribute('tabindex');else control.setAttribute('tabindex',value);}
+   savedTabIndexes.clear();
+   const target=returnFocus?.isConnected&&!returnFocus.closest('[hidden]')&&returnFocus.getAttribute('aria-disabled')!=='true'?returnFocus:$('#reset');
+   if(target&&target!==document.body)target.focus();else $('#reset')?.focus();
+   returnFocus=null;
+  }
+ }
+ const attributes={x:'-50%',y:'-50%',width:'200%',height:'200%','color-interpolation-filters':'sRGB',primitiveUnits:'userSpaceOnUse'};
+ // A rounded alpha expansion uses a handful of primitives, not dozens of offset copies.
+ const paper=el('filter',{id:'pickup-paper',...attributes},[
+  el('feMorphology',{in:'SourceAlpha',operator:'dilate',radius:6,result:'expanded'}),
+  el('feGaussianBlur',{in:'expanded',stdDeviation:2,result:'soft'}),
+  el('feColorMatrix',{in:'soft',type:'matrix',values:'0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 20 -7',result:'paper'}),
+  el('feMorphology',{in:'paper',operator:'dilate',radius:2,result:'edge'}),
+  el('feFlood',{'flood-color':'#351e28',result:'ink'}),el('feComposite',{in:'ink',in2:'edge',operator:'in',result:'outline'}),
+  el('feFlood',{'flood-color':'#fff',result:'white'}),el('feComposite',{in:'white',in2:'paper',operator:'in',result:'backing'}),
+  el('feMerge',{},['outline','backing','SourceGraphic'].map(v=>el('feMergeNode',{in:v})))
+ ]);
+ const shadow=el('filter',{id:'common-shadow',...attributes},[
+  el('feGaussianBlur',{in:'SourceAlpha',stdDeviation:5,result:'blur'}),el('feOffset',{in:'blur',dx:2,dy:2,result:'offset'}),
+  el('feFlood',{'flood-color':'#000','flood-opacity':.25,result:'color'}),el('feComposite',{in:'color',in2:'offset',operator:'in'})
+ ]);
+ defs.append(paper,shadow);
+ for(const panel of svg.querySelectorAll('[data-shadow-panel]')) {
+  if(panel.id)panel.before(el('g',{class:'shadow-only',filter:'url(#common-shadow)'},[use(panel.id)]));
+ }
+ const board=$('#board-base');
+ if(board){const shadowNode=el('g',{class:'shadow-only',filter:'url(#common-shadow)'},[use('board-base')]);board.before(shadowNode);}
+ for(const item of items)for(const rotation of [0,90,180,270]){
+  const layout=artLayout(item,rotation),id=`layout-${item.id}-${rotation}`;
+  const art=el('g',{id},layout.parts.map(p=>el('g',{transform:p.transform},[use(p.id)])));
+  defs.append(art);artCache.set(`${item.id}:${rotation}`,id);
+  const clip=el('clipPath',{id:`cells-${item.id}-${rotation}`,clipPathUnits:'userSpaceOnUse'},layout.cells.map(([c,r])=>el('rect',{x:c*BOARD.cellWidth,y:r*BOARD.cellHeight,width:BOARD.cellWidth,height:BOARD.cellHeight})));
+  defs.append(clip);
+ }
+ const updateMatrix=()=>{inverse=svg.getScreenCTM()?.inverse();positionHeld();};
+ const svgPoint=(x,y)=>new DOMPoint(x,y).matrixTransform(inverse||svg.getScreenCTM().inverse());
+ function track(event){pointer={x:event.clientX,y:event.clientY};if(state.held&&!raf)raf=requestAnimationFrame(()=>{raf=0;positionHeld();});}
+ function positionHeld(){if(!state.held||!pointer)return;const p=svgPoint(pointer.x,pointer.y),a=artLayout(byId.get(state.held),state.rotations[state.held]);$('#held-item').setAttribute('transform',`translate(${p.x-a.centerX} ${p.y-a.centerY})`);}
+ function renderPiece(item,p){
+  const origin=`translate(${BOARD.x+p.col*BOARD.cellWidth} ${BOARD.y+p.row*BOARD.cellHeight})`,a=artLayout(item,p.rotation);
+  const viewport=el('svg',{x:0,y:0,width:a.pixelWidth,height:a.pixelHeight,viewBox:`0 0 ${item.width*BOARD.cellWidth} ${item.height*BOARD.cellHeight}`,preserveAspectRatio:'xMidYMid slice',overflow:'hidden'},[use(`photo-${item.id}`)]);
+  const texture=el('g',{'data-texture':item.id,transform:origin},[el('g',{'clip-path':`url(#cells-${item.id}-${p.rotation})`},[viewport])]);
+  const piece=el('g',{'data-placed':item.id,transform:origin,role:'button',tabindex:0,'aria-label':`${item.name} 집기`},[
+   ...a.cells.map(([c,r])=>el('rect',{x:c*BOARD.cellWidth,y:r*BOARD.cellHeight,width:BOARD.cellWidth,height:BOARD.cellHeight,fill:'transparent'})),
+   el('g',{class:'placed-art'},[use(artCache.get(`${item.id}:${p.rotation}`))])
+  ]);
+  $('#board-textures').append(texture);$('#placed-items').append(piece);
+  rendered.set(item.id,{key:JSON.stringify(p),texture,piece});
+ }
+ function dialogue(kind,animate){
+  const speech=$('#speech');if(!speech||!$(`#dialogue-${kind}`))return;
+  speech.getAnimations().forEach(a=>a.cancel());speech.replaceChildren(use(`dialogue-${kind}`));speech.dataset.dialogue=kind;
+  if(animate&&!matchMedia('(prefers-reduced-motion: reduce)').matches)speech.animate([{transform:'scale(.04,.04)',opacity:0},{transform:'scale(1.035,1.06)',opacity:1,offset:.7},{transform:'scale(1)',opacity:1}],{duration:1020,easing:'cubic-bezier(.2,.8,.2,1)'});
+ }
+ function render(lastPlaced=null){
+  ++revision;clearTimeout(endTimer);clearTimeout(popupTimer);setCompletion(false);
+  for(const item of items){
+   const placement=state.placements[item.id],previous=rendered.get(item.id);
+   if(previous&&previous.key!==JSON.stringify(placement)){stopPlacementMotion(previous.piece);previous.texture.remove();previous.piece.remove();rendered.delete(item.id);}
+   if(placement&&!rendered.has(item.id))renderPiece(item,placement);
+   const slot=$(`[data-item="${item.id}"]`),used=!!placement||state.held===item.id;
+   if(slot){show(slot.querySelector('.tray-original'),!used);show(slot.querySelector('.tray-ghost'),used);show(slot.querySelector('.tray-label'),!!placement);slot.setAttribute('aria-disabled',String(used));slot.setAttribute('tabindex',used?'-1':'0');slot.style.pointerEvents=used?'none':'';}
+   svg.querySelectorAll(`[data-reveal="${item.id}"]`).forEach(n=>{if(!placement)stopPlacementMotion(n);show(n,!!placement);});
+   if(!placement)svg.querySelectorAll(`[data-complete-reveal="${item.id}"]`).forEach(stopPlacementMotion);
+  }
+  const count=Object.keys(state.placements).length,complete=game.complete(state);
+  if($('#progress-count'))$('#progress-count').textContent=`${count}/${items.length}`;
+  const fill=$('#progress-fill');if(fill)fill.setAttribute('width',(Number(fill.dataset.fullWidth)||243.73)*count/items.length);
+  svg.dataset.complete=String(complete);svg.dataset.held=state.held||'';
+  svg.classList.toggle('holding',!!state.held);
+  const key=state.held?`${state.held}:${state.rotations[state.held]}`:'';
+  if(key!==heldKey){heldKey=key;const held=$('#held-item');held.replaceChildren();if(key){const id=artCache.get(key);held.append(el('g',{class:'shadow-only',filter:'url(#common-shadow)'},[use(id)]),el('g',{class:'pickup-paper'},[use(id)]));}show(held,!!key);}
+  positionHeld();
+  show($('#room-start'),!complete);show($('#room-complete')||$('#room-finish'),complete);show($('#room-additions'),!complete);
+  if(lastPlaced){
+   const selector=complete?`[data-complete-reveal="${lastPlaced}"]`:`[data-reveal="${lastPlaced}"]`;
+   playPlacement(rendered.get(lastPlaced)?.piece,[...svg.querySelectorAll(selector)]);
+  }
+  if(lastPlaced&&complete){dialogue('finish',true);const version=revision;popupTimer=setTimeout(()=>{if(version===revision&&game.complete(state))setCompletion(true);},3000);}
+  else if(!complete&&$('#speech')?.dataset.dialogue==='finish')dialogue('start',false);
+ }
+ function activate(target,point){
+  if(target.closest('#completion-next')){setCompletion(false);return;}
+  if(completionOpen)return;
+  if(target.closest('#reset')){state=game.initial();dialogue('start',false);render();return;}
+  if(state.held){
+   if(target.closest('#inventory')){state=game.returnPiece(state);render();return;}
+   const held=state.held,next=game.place(state,point.x-BOARD.x,point.y-BOARD.y);
+   if(next!==state){state=next;render(held);}return;
+  }
+  const node=target.closest('[data-placed],[data-item]');if(!node)return;
+  const id=node.dataset.placed||node.dataset.item;if(node.dataset.item&&state.placements[id])return;
+  state=game.pickup(state,id);render();
+ }
+ svg.addEventListener('click',event=>{track(event);activate(event.target,svgPoint(event.clientX,event.clientY));});
+ window.addEventListener('pointermove',track,{passive:true});
+ window.addEventListener('resize',updateMatrix);new ResizeObserver(updateMatrix).observe(svg);
+ document.addEventListener('contextmenu',event=>{if(!state.held||completionOpen)return;event.preventDefault();track(event);state=game.rotate(state);render();});
+ document.addEventListener('keydown',event=>{
+  if(completionOpen){
+   if(event.key==='Escape'){event.preventDefault();setCompletion(false);return;}
+   if(event.key==='Tab'){event.preventDefault();$('#completion-next')?.focus();return;}
+   if(event.key==='Enter'||event.key===' '){event.preventDefault();if(event.target.closest('#completion-next'))setCompletion(false);return;}
+   return;
+  }
+  if(event.key==='Escape'&&state.held){event.preventDefault();state=game.returnPiece(state);render();return;}
+  if(event.key.toLowerCase()==='r'&&state.held){event.preventDefault();state=game.rotate(state);render();return;}
+  if(event.key!=='Enter'&&event.key!==' ')return;
+  const target=event.target.closest('[role="button"]');if(!target)return;event.preventDefault();
+  const b=target.getBoundingClientRect();if(!state.held)pointer={x:b.x+b.width/2,y:b.y+b.height/2};
+  if(pointer)activate(target,svgPoint(pointer.x,pointer.y));
+ });
+ updateMatrix();dialogue('start',false);render();
+ // Read-only state snapshots make browser QA reproducible without bypassing input.
+ window.puzzle={room,items,getState:()=>structuredClone(state),layout:(id,r)=>artLayout(byId.get(id),r)};
+}

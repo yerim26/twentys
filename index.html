@@ -4,6 +4,7 @@ import { installHeldPieceAppearance } from './shared/held-piece.js';
 import { installStageNavigation } from './shared/stage-navigation.js';
 const frame = document.querySelector('#stage');
 frame.addEventListener('load', () => {
+  if (frame.dataset.stage === 'round2') return;
   installHeldPieceAppearance(frame.contentDocument);
   if (frame.dataset.stage === '1') installStageNavigation(frame.contentDocument, () => {
     const url = new URL(location.href);
@@ -13,6 +14,17 @@ frame.addEventListener('load', () => {
   });
 });
 function showStage() {
+  const params = new URL(location.href).searchParams;
+  if (params.get('round') === '2') {
+    const requestedRoom = params.get('room');
+    const room = ['workki', 'zibi', 'eddie'].includes(requestedRoom) ? requestedRoom : 'workki';
+    const target = new URL('round2/index.html', location.href);
+    target.searchParams.set('room', room);
+    frame.dataset.stage = 'round2';
+    frame.contentWindow.location.replace(target);
+    document.title = `${{ workki: '왈끼 작업방', zibi: '지비지기 침실', eddie: '에디 욕실' }[room]} · Round 2 독립 — Twentys`;
+    return;
+  }
   const requested = new URL(location.href).searchParams.get('stage');
   const stage = requested === '1' ? 1 : 2;
   // The host owns the round history; iframe loads must not add a second entry.
