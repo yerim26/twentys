@@ -35,5 +35,5 @@
 /* An inner visual pulses independently of the existing hover transform. */
 .question-next-pulse{transform-box:fill-box;transform-origin:center}
 #question-next.is-guided .question-next-pulse{animation:question-next-guide 1.2s ease-in-out infinite}
-@keyframes question-next-guide{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+@keyframes question-next-guide{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
 @media(prefers-reduced-motion:reduce){#question-next.is-guided .question-next-pulse{animation:none}}
