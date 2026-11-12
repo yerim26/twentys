@@ -263,7 +263,8 @@
         96.5302734375,
         46.1300048828125
       ],
-      "initialRotation": 0
+      "initialRotation": 0,
+      "texture": "assets/textures/zibi-clothes-linen.png"
     },
     {
       "id": "nightstand",

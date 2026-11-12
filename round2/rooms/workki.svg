@@ -3302,7 +3302,7 @@
         <rect class="cls-281" x="1249.44" y="1308.52" width="10.1" height="80.88" transform="translate(2603.4486 94.4692) rotate(90)" />
         <rect class="cls-281" x="1249.44" y="1318.37" width="10.1" height="80.88" transform="translate(2613.2957 104.3162) rotate(90)" />
       </g>
-      </g><g transform="translate(-1980 -356.6)" class="tray-label" hidden="hidden"><text class="cls-377" transform="translate(3209.8423 1330.883)"><tspan x="0" y="0">책</tspan></text>
+      </g><g transform="translate(-1980 -356.6)" class="tray-label" hidden="hidden"><text class="cls-377" transform="translate(3234.48718262 1330.883)" text-anchor="middle"><tspan x="0" y="0">책</tspan></text>
       </g><rect x="1209.0443115234375" y="932.460546875" width="90.8857421875" height="79.7955322265625" fill="transparent" class="hit-target" /></g><g data-item="plant" role="button" tabindex="0" aria-label="화분"><g transform="translate(0 -356.6)" class="tray-original"><g class="cls-403">
         <polygon class="cls-284" points="1384.69 1322.14 1337.34 1322.14 1337.34 1331.98 1341.93 1331.98 1344.89 1361.48 1378.2 1361.48 1380.17 1331.98 1384.69 1331.98 1384.69 1322.14" />
         <g>
@@ -3321,7 +3321,7 @@
           <circle class="cls-284" cx="1361.12" cy="1319.72" r="9.23" />
         </g>
       </g>
-      </g><g transform="translate(-1980 -356.6)" class="tray-label" hidden="hidden"><text class="cls-377" transform="translate(3315.9902 1330.883)"><tspan x="0" y="0">화분</tspan></text>
+      </g><g transform="translate(-1980 -356.6)" class="tray-label" hidden="hidden"><text class="cls-377" transform="translate(3341.01495361 1330.883)" text-anchor="middle"><tspan x="0" y="0">화분</tspan></text>
       </g><rect x="1332.3399658203125" y="934.0300048828125" width="57.3499755859375" height="75.8499755859375" fill="transparent" class="hit-target" /></g><g data-item="monitor" role="button" tabindex="0" aria-label="모니터"><g transform="translate(0 -356.6)" class="tray-original"><g class="cls-519">
         <polygon class="cls-272" points="1631.4 1348.7 1631.4 1271.53 1496.47 1271.53 1496.47 1348.7 1560.08 1348.7 1560.08 1354.22 1528.72 1354.22 1528.72 1357.07 1600.48 1357.07 1600.48 1354.22 1567.79 1354.22 1567.79 1348.7 1631.4 1348.7" />
       </g>
