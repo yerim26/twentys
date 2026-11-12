@@ -1,4 +1,6 @@
 import {goToRound} from '../shared/navigation.js';
+import {installInactivityReset} from '../shared/inactivity.js';
+installInactivityReset();
 const NS='http://www.w3.org/2000/svg';
 const make=(tag,attrs={})=>{const n=document.createElementNS(NS,tag);for(const[k,v]of Object.entries(attrs))n.setAttribute(k,v);return n;};
 const show=(node,yes)=>node?.toggleAttribute('hidden',!yes);
@@ -16,6 +18,8 @@ try{
 function initialize(svg,data){
  const $=selector=>svg.querySelector(selector),$$=selector=>[...svg.querySelectorAll(selector)];
  let phase='survey',question=0,answers=Array(7).fill(null),room=null,nextDot=1;
+ let progressTarget=-1,progressAnimation=null;
+ window.addEventListener('pagehide',()=>progressAnimation?.cancel(),{once:true});
  const questions=data.questions||[];
  const drawHint=$('#draw-hint'),drawHintPosition=make('g',{id:'draw-hint-position'});
  drawHint.before(drawHintPosition);drawHintPosition.append(drawHint);
@@ -115,7 +119,18 @@ function initialize(svg,data){
   show($('#question-prev'),survey);show($('#question-next'),survey);
   $('#question-prev')?.setAttribute('aria-disabled',String(question===0));$('#question-next')?.setAttribute('aria-disabled',String(answers[question]===null));
   lines.setAttribute('fill',phase==='connected'?'#f9f2fc':'none');
-  const progress=$('#dot-progress-fill');if(progress)progress.setAttribute('width',Number(progress.dataset.fullWidth||243.73)*Math.min(nextDot-1,21)/21);
+  const progress=$('#dot-progress-fill');
+  if(progress){
+   const target=Number(progress.dataset.fullWidth||243.73)*Math.min(nextDot-1,21)/21;
+   if(target!==progressTarget){
+    const current=Number.parseFloat(getComputedStyle(progress).width)||0;
+    progressTarget=target;progressAnimation?.cancel();progress.setAttribute('width',target);
+    if(target>0&&!matchMedia('(prefers-reduced-motion: reduce)').matches&&Math.abs(current-target)>.01){
+     progressAnimation=progress.animate([{width:`${current}px`},{width:`${target}px`}],{duration:400,easing:'cubic-bezier(.2,.8,.2,1)'});
+     progressAnimation.id='survey-progress-fill';
+    }
+   }
+  }
   show($('#result-show'),phase==='connected');show($('#draw-hint'),phase==='connect'||phase==='moving');text('#dot-progress',`${Math.min(nextDot-1,21)}/21`);
  }
  function chooseRoom(){
